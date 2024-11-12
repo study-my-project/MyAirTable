@@ -21,11 +21,11 @@ public class WorkspaceService {
 
     // Read - 모든 Workspace 목록으로 보기
     public List<Workspace> getAllWorkspaces() {
-        return workspaceRepository.findAll();
+        return workspaceRepository.findAllNotDeleted();
     }
     // Read - 특정 Workspace 내용 보기
     public Optional<Workspace> getWorkspaceById(Long id) {
-        return workspaceRepository.findById(id);
+        return workspaceRepository.findByIdAndNotDeleted(id);
     }
 
     // Update
