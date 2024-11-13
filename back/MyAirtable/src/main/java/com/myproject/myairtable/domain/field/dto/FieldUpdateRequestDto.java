@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @Data
 public class FieldUpdateRequestDto {
-    // 테이블 ID
+    // 필드 ID
     private Long Id;
 
     // 상단부 이름
