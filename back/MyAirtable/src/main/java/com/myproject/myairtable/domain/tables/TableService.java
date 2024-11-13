@@ -1,9 +1,5 @@
 package com.myproject.myairtable.domain.tables;
 
-import com.myproject.myairtable.domain.base.Base;
-import com.myproject.myairtable.domain.base.BaseRepository;
-import com.myproject.myairtable.domain.base.dto.BaseCreateRequestDto;
-import com.myproject.myairtable.domain.base.dto.BaseUpdateRequestDto;
 import com.myproject.myairtable.domain.tables.dto.TableCreateRequestDto;
 import com.myproject.myairtable.domain.tables.dto.TableUpdateRequestDto;
 import lombok.RequiredArgsConstructor;

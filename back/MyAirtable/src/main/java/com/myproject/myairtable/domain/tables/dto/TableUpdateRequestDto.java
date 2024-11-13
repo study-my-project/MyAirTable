@@ -10,5 +10,5 @@ public class TableUpdateRequestDto {
     private Long id;
 
     // 테이블 이름
-    private String TableName;
+    private String tableName;
 }
