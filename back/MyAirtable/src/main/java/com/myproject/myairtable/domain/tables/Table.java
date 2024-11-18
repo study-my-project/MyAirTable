@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@jakarta.persistence.Table(name="table")
+@jakarta.persistence.Table(name="tables")
 public class Table extends BaseEntity {
 
     @Id

@@ -1,0 +1,37 @@
+type Query {
+    # 모든 Workspace 조회
+    getAllWorkspaces: [Workspace!]!
+
+    # 특정 Workspace 조회
+    getWorkspace(workspaceId: ID!): Workspace
+}
+
+type Mutation {
+    # Workspace 생성
+    createWorkspace(workspaceCreateRequestDto: WorkspaceCreateRequestDto!): Workspace!
+
+    # Workspace 업데이트
+    updateWorkspace(requestDto: WorkspaceUpdateRequestDto!): Workspace!
+
+    # Workspace 삭제 (논리 삭제)
+    deleteWorkspace(workspaceId: ID!): Boolean!
+}
+
+
+input WorkspaceCreateRequestDto {
+    # 요청 필드 정의
+    workspaceName: String!
+}
+
+input WorkspaceUpdateRequestDto {
+    # 요청 필드 정의
+    id: ID!
+    workspaceName: String!
+}
+
+type Workspace{
+    id: ID!
+    workspaceName : String!
+    createdAt: String
+    updatedAt: String
+}

@@ -20,24 +20,20 @@ public class WorkspaceController {
 
     // Create
     @MutationMapping
-    public ResponseEntity<Workspace> createWorkspace(@Argument WorkspaceCreateRequestDto workspaceCreateRequestDto) {
-        Workspace workspace = workspaceService.createWorkspace(workspaceCreateRequestDto);
-        return ResponseEntity.ok(workspace);
+    public Workspace createWorkspace(@Argument WorkspaceCreateRequestDto workspaceCreateRequestDto) {
+        return workspaceService.createWorkspace(workspaceCreateRequestDto);
     }
 
     // Read - 모든 Workspace 목록으로 보기
     @QueryMapping
-    public ResponseEntity<List<Workspace>> getAllWorkspaces() {
-        List<Workspace> workspaces = workspaceService.getAllWorkspaces();
-        return ResponseEntity.ok(workspaces);
+    public List<Workspace> getAllWorkspaces() {
+        return workspaceService.getAllWorkspaces();
     }
 
     // Read - 특정 Workspace 조회
     @QueryMapping
-    public ResponseEntity<Workspace> getWorkspace(@Argument Long workspaceId) {
-        return workspaceService.getWorkspaceById(workspaceId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Workspace getWorkspace(@Argument Long workspaceId) {
+        return workspaceService.getWorkspaceById(workspaceId);
     }
 
     // Update
