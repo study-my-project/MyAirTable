@@ -6,27 +6,33 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "graphcode" : "graphql-codegen"
   },
   "dependencies": {
     "@apollo/client": "^3.11.10",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.7",
+    "@mui/material": "^6.1.7",
     "antd": "^5.22.1",
     "axios": "^1.7.7",
     "graphql": "^16.9.0",
     "next": "15.0.3",
     "react": "19.0.0-rc-66855b96-20241106",
-    "react-dom": "19.0.0-rc-66855b96-20241106"
+    "react-dom": "19.0.0-rc-66855b96-20241106",
+    "react-table": "^7.8.0"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/react-table": "^7.7.20",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5.6.3"
   }
 }
