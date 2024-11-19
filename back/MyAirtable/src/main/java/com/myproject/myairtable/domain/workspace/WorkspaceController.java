@@ -45,8 +45,7 @@ public class WorkspaceController {
 
     // Delete (논리 삭제)
     @MutationMapping
-    public ResponseEntity<Void> deleteWorkspace(@Argument Long workspaceId) {
-        workspaceService.deleteWorkspace(workspaceId);
-        return ResponseEntity.noContent().build();
+    public Boolean  deleteWorkspace(@Argument Long workspaceId) {
+        return workspaceService.deleteWorkspace(workspaceId);
     }
 }

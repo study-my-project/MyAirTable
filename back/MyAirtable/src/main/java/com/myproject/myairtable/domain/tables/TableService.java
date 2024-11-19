@@ -25,6 +25,11 @@ public class TableService {
         return tableRepository.findByBaseId(baseId);
     }
 
+    // Read - 특정 테이블 읽기
+    public Table getTableById(Long tableId) {
+        return tableRepository.findByIdAndNotDeleted(tableId);
+    }
+
     // Update
     public Table updateTable(TableUpdateRequestDto tableUpdateRequestDto) {
         return tableRepository.findById(tableUpdateRequestDto.getId())
@@ -36,12 +41,14 @@ public class TableService {
     }
 
     // Delete (논리 삭제)
-    public void deleteTable(Long id) {
-        tableRepository.findById(id)
-                .ifPresent(table -> {
-                    table.delete(); // 논리적 삭제 수행
-                    tableRepository.save(table); // 변경사항 저장
-                });
+    public Boolean deleteTable(Long id) {
+        return tableRepository.findById(id)
+                .map(table -> {
+                    table.delete();
+                    tableRepository.save(table);
+                    return true;
+                })
+                .orElse(false);
     }
 
 

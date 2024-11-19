@@ -20,16 +20,20 @@ public class TableController {
 
     // Create
     @MutationMapping
-    public ResponseEntity<Table> createTable(@Argument TableCreateRequestDto tableCreateRequestDto) {
-        Table table = tableService.createTable(tableCreateRequestDto);
-        return ResponseEntity.ok(table);
+    public Table createTable(@Argument TableCreateRequestDto tableCreateRequestDto) {
+        return tableService.createTable(tableCreateRequestDto);
     }
 
     // Read - 모든 Table 목록으로 보기
     @QueryMapping
-    public ResponseEntity<List<Table>> getTablesByBaseId(@Argument Long baseId) {
-        List<Table> table = tableService.getTablesByBaseId(baseId);
-        return ResponseEntity.ok(table);
+    public List<Table> getTablesByBaseId(@Argument Long baseId) {
+        return tableService.getTablesByBaseId(baseId);
+    }
+
+    // Read - 특정 Table 보기
+    @QueryMapping
+    public Table getTableById(@Argument Long tableId) {
+        return tableService.getTableById(tableId);
     }
 
 
@@ -42,9 +46,8 @@ public class TableController {
 
     // Delete (논리 삭제)
     @MutationMapping
-    public ResponseEntity<Void> deleteTable(@Argument Long tableId) {
-        tableService.deleteTable(tableId);
-        return ResponseEntity.noContent().build();
+    public Boolean deleteTable(@Argument Long tableId) {
+        return tableService.deleteTable(tableId);
     }
 
 }

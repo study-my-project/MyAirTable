@@ -1,22 +1,57 @@
 type Query {
     # 모든 Workspace 조회
     getAllWorkspaces: [Workspace!]!
-
     # 특정 Workspace 조회
     getWorkspace(workspaceId: ID!): Workspace
+
+    # 특정 Workspace 의 모든 base 를 조회
+    getBasesByWorkspaceId(workspaceId: ID!) : [Base!]!
+    # 특정 Base 를 조회
+    getBaseById(baseId: ID!):Base!
+
+    # 특정 Base 의 테이블 전체 조회
+    getTablesByBaseId(baseId: ID!):[Table!]!
+    # 특정 테이블 조회
+    getTableById(tableId: ID!):Table!
+
+    # 해당 테이블의 Field 목록으로 보기
+    getFieldsByTableId(tableId: ID!):[Field!]!
+    # 해당 테이블의 Record 목록으로 보기
+    getRecordsByTableId(tableId: ID!):[Record!]!
+    # 해당 필드 레코드에 맞는 CellValue 보기
+    getCellValue(cellValueReadRequestDto: CellValueReadRequestDto!):CellValue!
+
 }
 
 type Mutation {
     # Workspace 생성
     createWorkspace(workspaceCreateRequestDto: WorkspaceCreateRequestDto!): Workspace!
-
     # Workspace 업데이트
-    updateWorkspace(requestDto: WorkspaceUpdateRequestDto!): Workspace!
-
+    updateWorkspace(workspaceUpdateRequestDto: WorkspaceUpdateRequestDto!): Workspace!
     # Workspace 삭제 (논리 삭제)
     deleteWorkspace(workspaceId: ID!): Boolean!
-}
 
+    # Base 생성
+    createBase(baseCreateRequestDto : BaseCreateRequestDto!) : Base!
+    # Base 업데이트
+    updateBase(baseUpdateRequestDto : BaseUpdateRequestDto!) : Base!
+    # Base 삭제
+    deleteBase(baseId: ID!): Boolean!
+
+    # 테이블 생성
+    createTable(tableCreateRequestDto: TableCreateRequestDto!) : Table!
+    # 테이블 업데이트
+    updateTable (tableUpdateRequestDto: TableUpdateRequestDto!) : Table!
+    # 테이블 삭제
+    deleteTable (tableId: ID!) : Boolean!
+
+    # 필드 생성
+    createField(fieldCreateRequestDto: FieldCreateRequestDto!) : Field!
+    # 레코드 생성
+    createRecord(recordCreateRequestDto: RecordCreateRequestDto!) : Record!
+    # CellValue 생성
+    createCellValue(cellValueCreateRequestDto: CellValueCreateRequestDto!) : CellValue!
+}
 
 input WorkspaceCreateRequestDto {
     # 요청 필드 정의
@@ -29,9 +64,86 @@ input WorkspaceUpdateRequestDto {
     workspaceName: String!
 }
 
+input BaseCreateRequestDto {
+    workspaceId: ID!
+    baseName: String!
+}
+input BaseUpdateRequestDto {
+    Id: ID!
+    baseName: String!
+}
+
+input TableCreateRequestDto{
+    baseId: ID!
+    tableName: String!
+}
+input TableUpdateRequestDto{
+    id: ID!
+    tableName: String!
+}
+input FieldCreateRequestDto{
+    tableId: ID!
+    fieldName: String!
+    type: String!
+    options: String!
+}
+input RecordCreateRequestDto{
+    tableId: ID!
+}
+input CellValueReadRequestDto{
+    fieldId: ID!
+    recordId: ID!
+}
+input CellValueCreateRequestDto{
+    fieldId: ID!
+    recordId: ID!
+    value: String!
+}
+
 type Workspace{
     id: ID!
     workspaceName : String!
+    createdAt: String
+    updatedAt: String
+}
+type Base{
+    id: ID!
+    workspaceId: ID!
+    baseName: String!
+    createdAt: String
+    updatedAt: String
+}
+
+type Table{
+    id: ID!
+    baseId: ID!
+    tableName: String!
+    createdAt: String
+    updatedAt: String
+}
+
+type Field{
+    id: ID!
+    tableId: ID!
+    fieldName : String!
+    type : String!
+    options: String!
+    createdAt: String
+    updatedAt: String
+}
+
+type Record{
+    id : ID!
+    tableId: ID!
+    createdAt: String
+    updatedAt: String
+}
+
+type CellValue{
+    id : ID!
+    fieldId: ID!
+    recordId: ID!
+    value: String!
     createdAt: String
     updatedAt: String
 }

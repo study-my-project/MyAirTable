@@ -19,16 +19,22 @@ public class BaseController {
 
     // Create
     @MutationMapping
-    public ResponseEntity<Base> createBase(@Argument BaseCreateRequestDto baseCreateRequestDto) {
-        Base base = baseService.createBase(baseCreateRequestDto);
-        return ResponseEntity.ok(base);
+    public Base  createBase(@Argument BaseCreateRequestDto baseCreateRequestDto) {
+        System.out.println(baseCreateRequestDto.getBaseName());
+        System.out.println("베이스 만들기");
+        return baseService.createBase(baseCreateRequestDto);
     }
 
     // Read - 모든 Base 목록으로 보기
     @QueryMapping
-    public ResponseEntity<List<Base>> getBasesByWorkspaceId(@Argument Long workspaceId) {
-        List<Base> base = baseService.getBasesByWorkspaceId(workspaceId);
-        return ResponseEntity.ok(base);
+    public List<Base> getBasesByWorkspaceId(@Argument Long workspaceId) {
+        return baseService.getBasesByWorkspaceId(workspaceId);
+    }
+
+    // Read - 특정 Base 조회하기
+    @QueryMapping
+    public Base getBaseById(@Argument Long BaseId) {
+        return baseService.getBaseById(BaseId);
     }
 
 
@@ -41,9 +47,8 @@ public class BaseController {
 
     // Delete (논리 삭제)
     @MutationMapping
-    public ResponseEntity<Void> deleteBase(@Argument Long baseId) {
-        baseService.deleteBase(baseId);
-        return ResponseEntity.noContent().build();
+    public Boolean deleteBase(@Argument Long baseId) {
+        return baseService.deleteBase(baseId);
     }
 
 }

@@ -11,4 +11,7 @@ public interface BaseRepository extends JpaRepository<Base, Long> {
 
     @Query("SELECT w FROM Base w WHERE w.workspaceId = :workspaceId AND w.deletedAt IS NULL")
     List<Base> findByWorkspaceId(@Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT b FROM Base b WHERE b.id = :id AND b.deletedAt IS NULL")
+    Base findByIdAndNotDeleted(@Param("id") Long id);
 }

@@ -24,6 +24,11 @@ public class BaseService {
         return baseRepository.findByWorkspaceId(workspaceId);
     }
 
+    // Read - 특정 Base 가져오기
+    public Base getBaseById(Long id) {
+        return baseRepository.findByIdAndNotDeleted(id);
+    }
+
     // Update
     public Base updateBase(BaseUpdateRequestDto baseUpdateRequestDto) {
         return baseRepository.findById(baseUpdateRequestDto.getId())
@@ -35,13 +40,13 @@ public class BaseService {
     }
 
     // Delete (논리 삭제)
-    public void deleteBase(Long id) {
-        baseRepository.findById(id)
-                .ifPresent(base -> {
-                    base.delete(); // 논리적 삭제 수행
-                    baseRepository.save(base); // 변경사항 저장
-                });
+    public Boolean deleteBase(Long id) {
+        return baseRepository.findById(id)
+                        .map(base -> {
+                            base.delete();
+                            baseRepository.save(base);
+                            return true;
+                        })
+                .orElse(false);
     }
-
-
 }

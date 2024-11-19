@@ -40,11 +40,13 @@ public class WorkspaceService {
     }
 
     // Delete (논리 삭제)
-    public void deleteWorkspace(Long id) {
-        workspaceRepository.findById(id)
-                .ifPresent(workspace -> {
+    public Boolean  deleteWorkspace(Long id) {
+        return workspaceRepository.findById(id)
+                .map(workspace -> {
                     workspace.delete(); // 논리적 삭제 수행
                     workspaceRepository.save(workspace); // 변경사항 저장
-                });
+                    return true; // 삭제 성공 시 true 반환
+                })
+                .orElse(false); // 해당 ID가 없으면 false 반환
     }
 }
