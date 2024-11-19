@@ -67,3 +67,27 @@ export const Input = styled.input`
   border-radius: 8px;
   font-size: 1rem;
 `;
+
+export const BaseList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+export const BaseItem = styled.div`
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: #f9f9f9;
+`;
+
+export const BaseTitle = styled.h3`
+  margin: 0;
+  font-size: 1.2em;
+`;
+
+export const BaseUpdatedAt = styled.p`
+  margin: 0;
+  font-size: 0.9em;
+  color: #666;
+`;
