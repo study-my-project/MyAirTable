@@ -2,6 +2,7 @@ package com.myproject.myairtable.domain.tables;
 
 
 import com.myproject.myairtable.domain.tables.dto.TableCreateRequestDto;
+import com.myproject.myairtable.domain.tables.dto.TableDetailsResponseDto;
 import com.myproject.myairtable.domain.tables.dto.TableUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -30,18 +31,17 @@ public class TableController {
         return tableService.getTablesByBaseId(baseId);
     }
 
-    // Read - 특정 Table 보기
+    // Read - 특정 Table 필드, 레코드, 셀 밸류 가져오기
     @QueryMapping
-    public Table getTableById(@Argument Long tableId) {
-        return tableService.getTableById(tableId);
+    public TableDetailsResponseDto getTableDetailsById(@Argument Long tableId) {
+        return tableService.getTableDetailsById(tableId);
     }
 
 
     // Update
     @MutationMapping
-    public ResponseEntity<Table> updateTable(@Argument TableUpdateRequestDto tableUpdateRequestDto) {
-        Table updatedTable = tableService.updateTable(tableUpdateRequestDto);
-        return ResponseEntity.ok(updatedTable);
+    public Table updateTable(@Argument TableUpdateRequestDto tableUpdateRequestDto) {
+        return tableService.updateTable(tableUpdateRequestDto);
     }
 
     // Delete (논리 삭제)

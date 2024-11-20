@@ -25,11 +25,13 @@ public class RecordService {
 
 
     // Delete (논리 삭제)
-    public void deleteRecord(Long id) {
-        recordRepository.findById(id)
-                .ifPresent(record -> {
+    public Boolean deleteRecord(Long id) {
+        return recordRepository.findById(id)
+                .map(record -> {
                     record.delete(); // 논리적 삭제 수행
                     recordRepository.save(record); // 변경사항 저장
-                });
+                    return true;
+                })
+                .orElse(false);
     }
 }

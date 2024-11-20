@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -41,4 +43,5 @@ public class CellValue extends BaseEntity {
             this.value = cellValueUpdateRequestDto.getValue();
         }
     }
+
 }

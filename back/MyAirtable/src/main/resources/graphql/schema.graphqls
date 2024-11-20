@@ -11,8 +11,8 @@ type Query {
 
     # 특정 Base 의 테이블 전체 조회
     getTablesByBaseId(baseId: ID!):[Table!]!
-    # 특정 테이블 조회
-    getTableById(tableId: ID!):Table!
+    # 특정 테이블 상세 조회
+    getTableDetailsById(tableId: ID!):TableDetailsResponseDto!
 
     # 해당 테이블의 Field 목록으로 보기
     getFieldsByTableId(tableId: ID!):[Field!]!
@@ -81,6 +81,7 @@ input TableUpdateRequestDto{
     id: ID!
     tableName: String!
 }
+
 input FieldCreateRequestDto{
     tableId: ID!
     fieldName: String!
@@ -98,6 +99,12 @@ input CellValueCreateRequestDto{
     fieldId: ID!
     recordId: ID!
     value: String!
+}
+
+type TableDetailsResponseDto{
+    fields: [Field!]!
+    records: [Record!]!
+    cellValues: [CellValue!]!
 }
 
 type Workspace{

@@ -20,10 +20,6 @@ public class CellValueService {
         return cellValueRepository.save(cellValue);
     }
 
-    // Read - 필드, 레코드 id로 CellValue 가져오기
-    public Optional<CellValue> getCellValue(CellValueReadRequestDto cellValueReadRequestDto) {
-        return cellValueRepository.findByFieldIdAndRecordId(cellValueReadRequestDto.getFieldId(),cellValueReadRequestDto.getRecordId());
-    }
 
     // Update
     public CellValue updateCellValue (CellValueUpdateRequestDto cellValueUpdateRequestDto) {
@@ -36,12 +32,14 @@ public class CellValueService {
     }
 
     // Delete (논리 삭제)
-    public void deleteCellValue(Long id) {
-        cellValueRepository.findById(id)
-                .ifPresent(cellValue -> {
-                    cellValue.delete(); // 논리적 삭제 수행
-                    cellValueRepository.save(cellValue); // 변경사항 저장
-                });
+    public Boolean deleteCellValue(Long id) {
+        return cellValueRepository.findById(id)
+                .map(cellValue -> {
+                    cellValue.delete();
+                    cellValueRepository.save(cellValue);
+                    return true;
+                })
+                .orElse(false);
     }
 
 }

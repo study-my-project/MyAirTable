@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -40,9 +39,8 @@ public class BaseController {
 
     // Update
     @MutationMapping
-    public ResponseEntity<Base> updateBase(@Argument BaseUpdateRequestDto baseUpdateRequestDto) {
-        Base updatedBase = baseService.updateBase(baseUpdateRequestDto);
-        return ResponseEntity.ok(updatedBase);
+    public Base updateBase(@Argument BaseUpdateRequestDto baseUpdateRequestDto) {
+        return baseService.updateBase(baseUpdateRequestDto);
     }
 
     // Delete (논리 삭제)

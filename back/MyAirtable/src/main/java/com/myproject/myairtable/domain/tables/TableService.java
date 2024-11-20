@@ -1,6 +1,13 @@
 package com.myproject.myairtable.domain.tables;
 
+import com.myproject.myairtable.domain.cellvalue.CellValue;
+import com.myproject.myairtable.domain.cellvalue.CellValueRepository;
+import com.myproject.myairtable.domain.field.Field;
+import com.myproject.myairtable.domain.field.FieldRepository;
+import com.myproject.myairtable.domain.record.Record;
+import com.myproject.myairtable.domain.record.RecordRepository;
 import com.myproject.myairtable.domain.tables.dto.TableCreateRequestDto;
+import com.myproject.myairtable.domain.tables.dto.TableDetailsResponseDto;
 import com.myproject.myairtable.domain.tables.dto.TableUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +20,9 @@ public class TableService {
 
 
     private final TableRepository tableRepository;
+    private final FieldRepository fieldRepository;
+    private final RecordRepository recordRepository;
+    private final CellValueRepository cellValueRepository;
 
     // Create
     public Table createTable(TableCreateRequestDto tableCreateRequestDto) {
@@ -26,8 +36,33 @@ public class TableService {
     }
 
     // Read - 특정 테이블 읽기
-    public Table getTableById(Long tableId) {
-        return tableRepository.findByIdAndNotDeleted(tableId);
+    public TableDetailsResponseDto getTableDetailsById(Long tableId) {
+        // 테이블에 속한 필드들 가져오기
+        List<Field> fieldsList = fieldRepository.findByTableId(tableId);
+        Field[] fields = fieldsList.toArray(new Field[0]);
+
+        // 테이블에 속한 레코드들 가져오기
+        List<Record> recordsList = recordRepository.findByTableId(tableId);
+        Record[] records = recordsList.toArray(new Record[0]);
+
+        // 셀 값 가져오기 필드, 레코드의 ID 값을 사용함
+        List<Long> fieldIds = fieldsList.stream()
+                .map(Field::getId)
+                .toList();
+        List<Long> recordIds = recordsList.stream()
+                .map(Record::getId)
+                .toList();
+
+        CellValue[] cellValues = cellValueRepository.findByFieldIdInAndRecordIdInAndDeletedAtIsNull(fieldIds, recordIds)
+                .toArray(new CellValue[0]);
+
+        // 응답 객체 생성 및 데이터 설정
+        TableDetailsResponseDto responseDto = new TableDetailsResponseDto();
+        responseDto.setFields(fields);
+        responseDto.setRecords(records);
+        responseDto.setCellValues(cellValues);
+
+        return responseDto;
     }
 
     // Update

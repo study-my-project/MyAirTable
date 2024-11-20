@@ -36,11 +36,13 @@ public class FieldService {
     }
 
     // Delete (논리 삭제)
-    public void deleteField(Long id) {
-        fieldRepository.findById(id)
-                .ifPresent(field -> {
+    public Boolean deleteField(Long id) {
+        return fieldRepository.findById(id)
+                .map(field -> {
                     field.delete(); // 논리적 삭제 수행
                     fieldRepository.save(field); // 변경사항 저장
-                });
+                    return true;
+                })
+                .orElse(false);
     }
 }

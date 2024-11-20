@@ -38,9 +38,8 @@ public class WorkspaceController {
 
     // Update
     @MutationMapping
-    public ResponseEntity<Workspace> updateWorkspace(@Argument WorkspaceUpdateRequestDto workspaceUpdateRequestDto) {
-        Workspace updatedWorkspace = workspaceService.updateWorkspace(workspaceUpdateRequestDto);
-        return ResponseEntity.ok(updatedWorkspace);
+    public Workspace updateWorkspace(@Argument WorkspaceUpdateRequestDto workspaceUpdateRequestDto) {
+        return workspaceService.updateWorkspace(workspaceUpdateRequestDto);
     }
 
     // Delete (논리 삭제)
