@@ -174,8 +174,8 @@ export type Query = {
   getFieldsByTableId: Array<Field>;
   /**  해당 테이블의 Record 목록으로 보기 */
   getRecordsByTableId: Array<Record>;
-  /**  특정 테이블 조회 */
-  getTableById: Table;
+  /**  특정 테이블 상세 조회 */
+  getTableDetailsById: TableDetailsResponseDto;
   /**  특정 Base 의 테이블 전체 조회 */
   getTablesByBaseId: Array<Table>;
   /**  특정 Workspace 조회 */
@@ -208,7 +208,7 @@ export type QueryGetRecordsByTableIdArgs = {
 };
 
 
-export type QueryGetTableByIdArgs = {
+export type QueryGetTableDetailsByIdArgs = {
   tableId: Scalars['ID']['input'];
 };
 
@@ -246,6 +246,13 @@ export type Table = {
 export type TableCreateRequestDto = {
   baseId: Scalars['ID']['input'];
   tableName: Scalars['String']['input'];
+};
+
+export type TableDetailsResponseDto = {
+  __typename?: 'TableDetailsResponseDto';
+  cellValues: Array<CellValue>;
+  fields: Array<Field>;
+  records: Array<Record>;
 };
 
 export type TableUpdateRequestDto = {

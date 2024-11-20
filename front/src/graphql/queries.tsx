@@ -44,3 +44,34 @@ query GetTablesByBaseId($baseId:ID!) {
 }
 
 `
+
+export const GET_TABLE_DETAILS = gql`
+query GetTableDetailsById($tableId:ID!) {
+    getTableDetailsById(tableId: $tableId) {
+        fields {
+            id
+            tableId
+            fieldName
+            type
+            options
+            createdAt
+            updatedAt
+        }
+        records {
+            id
+            tableId
+            createdAt
+            updatedAt
+        }
+        cellValues {
+            id
+            fieldId
+            recordId
+            value
+            createdAt
+            updatedAt
+        }
+    }
+}
+
+`

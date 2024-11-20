@@ -95,3 +95,20 @@ export const Content = styled.div`
   border-radius: 4px;
   background-color: #fff;
 `;
+
+
+export const AddButton = styled.button`
+  margin-left: 8px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
