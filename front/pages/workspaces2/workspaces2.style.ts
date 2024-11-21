@@ -79,6 +79,7 @@ export const BaseItem = styled.div`
   border: 1px solid #ccc;
   border-radius: 5px;
   background: #f9f9f9;
+  cursor: pointer;
 `;
 
 export const BaseTitle = styled.h3`
