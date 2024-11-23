@@ -51,6 +51,8 @@ type Mutation {
     createRecord(recordCreateRequestDto: RecordCreateRequestDto!) : Record!
     # CellValue 생성
     createCellValue(cellValueCreateRequestDto: CellValueCreateRequestDto!) : CellValue!
+    # CellValue 수정
+    updateCellValue(cellValueUpdateRequestDto: CellValueUpdateRequestDto!) : CellValue!
 }
 
 input WorkspaceCreateRequestDto {
@@ -105,6 +107,12 @@ type TableDetailsResponseDto{
     fields: [Field!]!
     records: [Record!]!
     cellValues: [CellValue!]!
+}
+
+input CellValueUpdateRequestDto {
+    recordId: ID!
+    fieldId: ID!
+    value : String!
 }
 
 type Workspace{

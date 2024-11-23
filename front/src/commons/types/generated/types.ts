@@ -54,6 +54,12 @@ export type CellValueReadRequestDto = {
   recordId: Scalars['ID']['input'];
 };
 
+export type CellValueUpdateRequestDto = {
+  fieldId: Scalars['ID']['input'];
+  recordId: Scalars['ID']['input'];
+  value: Scalars['String']['input'];
+};
+
 export type Field = {
   __typename?: 'Field';
   createdAt?: Maybe<Scalars['String']['output']>;
@@ -94,6 +100,8 @@ export type Mutation = {
   deleteWorkspace: Scalars['Boolean']['output'];
   /**  Base 업데이트 */
   updateBase: Base;
+  /**  CellValue 수정 */
+  updateCellValue: CellValue;
   /**  테이블 업데이트 */
   updateTable: Table;
   /**  Workspace 업데이트 */
@@ -148,6 +156,11 @@ export type MutationDeleteWorkspaceArgs = {
 
 export type MutationUpdateBaseArgs = {
   baseUpdateRequestDto: BaseUpdateRequestDto;
+};
+
+
+export type MutationUpdateCellValueArgs = {
+  cellValueUpdateRequestDto: CellValueUpdateRequestDto;
 };
 
 

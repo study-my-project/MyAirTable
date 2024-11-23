@@ -23,12 +23,18 @@ public class CellValueService {
 
     // Update
     public CellValue updateCellValue (CellValueUpdateRequestDto cellValueUpdateRequestDto) {
-        return cellValueRepository.findById(cellValueUpdateRequestDto.getId())
+        return cellValueRepository.findByFieldIdAndRecordIdAndDeletedAtIsNull(
+                        cellValueUpdateRequestDto.getFieldId(),
+                        cellValueUpdateRequestDto.getRecordId()
+                )
                 .map(cellValue -> {
                     cellValue.updateCellValue(cellValueUpdateRequestDto);  // update 메서드 호출
                     return cellValueRepository.save(cellValue); // 변경된 필드 저장 후 반환
                 })
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 Value를 찾을 수 없습니다: " + cellValueUpdateRequestDto.getId()));
+                .orElseThrow(() ->
+                        new IllegalArgumentException("해당 Field ID와 Record ID의 Value를 찾을 수 없습니다: " +
+                                "FieldId=" + cellValueUpdateRequestDto.getFieldId() + ", RecordId=" + cellValueUpdateRequestDto.getRecordId())
+                );
     }
 
     // Delete (논리 삭제)

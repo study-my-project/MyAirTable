@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface CellValueRepository extends JpaRepository<CellValue, Long> {
@@ -13,6 +14,12 @@ public interface CellValueRepository extends JpaRepository<CellValue, Long> {
     List<CellValue> findByFieldIdInAndRecordIdInAndDeletedAtIsNull(
             @Param("fieldIds") List<Long> fieldIds,
             @Param("recordIds") List<Long> recordIds
+    );
+
+    @Query("SELECT c FROM CellValue c WHERE c.fieldId = :fieldId AND c.recordId = :recordId AND c.deletedAt IS NULL")
+    Optional<CellValue> findByFieldIdAndRecordIdAndDeletedAtIsNull(
+            @Param("fieldId") Long fieldId,
+            @Param("recordId") Long recordId
     );
 
 }

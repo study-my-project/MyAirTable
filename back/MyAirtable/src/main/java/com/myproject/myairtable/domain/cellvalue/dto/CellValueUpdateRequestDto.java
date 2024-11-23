@@ -7,8 +7,9 @@ import lombok.Getter;
 @Data
 public class CellValueUpdateRequestDto {
 
-    // 셀 ID
-    private Long Id;
+    private Long fieldId;
+
+    private Long recordId;
 
     // 입력 내용
     private String value;
