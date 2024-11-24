@@ -1,143 +1,76 @@
-import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
-import * as styles from "./tablePage.style";
-import { GET_BASE_TABLES, GET_TABLE_DETAILS } from "../../../src/graphql/queries";
+import { GET_BASE_TABLES } from "../../../src/graphql/queries";
 import type {
-  QueryGetTablesByBaseIdArgs,
-  QueryGetTableDetailsByIdArgs,
-  Query
+    QueryGetTablesByBaseIdArgs,
+    Query
 } from "../../../src/commons/types/generated/types";
+import * as styles from "./tablePage.style";
+import React, { useState } from "react";
+import Sheet from "../../../src/components/sheet"
+
+
 
 export default function TablePage() {
-  const router = useRouter();
-  const { number } = router.query;
-  const baseId = Array.isArray(number) ? number[0] : number;
+    // useRouter 현재 페이지의 경로 및 쿼리 파라미터에 접근할 수 있음
+    const router = useRouter();
+    // router 를 통해서 값을 가져옴
+    // 주소값이 page?number=123인 경우 number는 123임
+    const { number } = router.query;
+    // 받아온 주소값을 baseId에다가 저장함.
+    const baseId = Array.isArray(number) ? number[0] : number;
 
-  // 테이블 목록 조회
-  const { loading, error, data } = useQuery<Pick<Query, "getTablesByBaseId">, QueryGetTablesByBaseIdArgs>(GET_BASE_TABLES, {
-    variables: baseId ? { baseId } : undefined,
-    skip: !baseId,
-  });
+    //baseId 가지고 table들 리스트로 가져오기
+    const { data } = useQuery<Pick<Query, "getTablesByBaseId">, QueryGetTablesByBaseIdArgs>(GET_BASE_TABLES, {
+        variables: baseId ? { baseId } : undefined,
+        skip: !baseId,
+    });
 
-  // 현재 선택된 테이블 ID 상태
-  const [activeTab, setActiveTab] = useState<string | null>(null);
+    // 받아온 테이블 리스트를 tables 변수에 저장
+    const tables = data?.getTablesByBaseId || [];
 
-  // 선택된 테이블의 상세 정보 조회
-  const { data: tableDetailsData, loading: tableDetailsLoading } = useQuery<
-    Pick<Query, "getTableDetailsById">,
-    QueryGetTableDetailsByIdArgs
-  >(GET_TABLE_DETAILS, {
-    variables: activeTab ? { tableId: activeTab } : undefined,
-    skip: !activeTab,
-  });
+        ///
 
-  // 필드 타입 정의
-  type FieldType = {
-    id: string;
-    fieldName: string;
-  };
+    // 현재 선택된 테이블 ID 상태
+    const [activeTab, setActiveTab] = useState<string | null>(null);
 
-  const [fields, setFields] = useState<FieldType[]>([]); // 필드 상태 관리
-
-  // 탭 클릭 이벤트 핸들러
-  const handleTabClick = (tabId: string) => {
-    setActiveTab(tabId);
-    // 서버로부터 가져온 필드를 초기화
-    const fetchedFields = tableDetailsData?.getTableDetailsById.fields || [];
-    setFields([...fetchedFields]);
-  };
-
-  const handleAddField = () => {
-    const newField: FieldType = {
-      id: `field-${fields.length + 1}`,
-      fieldName: `New Field ${fields.length + 1}`
+    // 탭 클릭 이벤트 핸들러
+    const handleTabClick = (tabId: string) => {
+        setActiveTab(tabId);
+        // 서버로부터 가져온 필드를 초기화
+        // const fetchedFields = tableDetailsData?.getTableDetailsById.fields || [];
+        // setFields([...fetchedFields]);
+        console.log(tabId)
     };
-    setFields([...fields, newField]);
-  };
-
-  if (!baseId || typeof baseId !== "string") {
-    return <p>Base ID가 제공되지 않았습니다.</p>;
-  }
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error.message}</p>;
-
-  const tables = data?.getTablesByBaseId || [];
-
-  // 엑셀 형식 테이블 데이터 렌더링
-  const renderTableData = () => {
-    if (tableDetailsLoading) return <p>Loading table details...</p>;
-
-    const records = tableDetailsData?.getTableDetailsById.records || [];
-    const cellValues = tableDetailsData?.getTableDetailsById.cellValues || [];
-
-    // 엑셀 형식의 데이터 생성
-    const grid = records.map((record) =>
-      fields.map((field) => {
-        const cell = cellValues.find(
-          (value) => value.fieldId === field.id && value.recordId === record.id
-        );
-        return cell ? cell.value : "";
-      })
-    );
 
     return (
-      <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: "500px" }}>
-        <styles.Table>
-          <thead>
-            <tr>
-              {fields.map((field, index) => (
-                <styles.TableHeader key={field.id}>
-                  {field.fieldName}
-                  {index === fields.length - 1 && (
-                    <styles.AddButton onClick={handleAddField}>
-                      +
-                    </styles.AddButton>
-                  )}
-                </styles.TableHeader>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {grid.map((row, rowIndex) => (
-              <styles.TableRow key={records[rowIndex].id}>
-                {row.map((cell, cellIndex) => (
-                  <styles.TableCell key={`${records[rowIndex].id}-${fields[cellIndex].id}`}>
-                    {cell}
-                  </styles.TableCell>
+        <styles.Container>
+            {/* 탭 목록 */}
+            <styles.Tabs>
+                {/* tables의 데이터 수만큼 반복 */}
+                {tables.map((table) => (
+                    <styles.Tab
+                        key={table.id}
+                        // isActive = 활성화 여부 boolean 값
+                        //  table.id 와 activeTab 값이 같으면 true 반환
+                        isActive={table.id === activeTab}
+                        // 탭을 클릭하면 발생할 이벤트
+                        onClick={() => handleTabClick(table.id)}
+                    >
+                        {table.tableName}
+                    </styles.Tab>
                 ))}
-              </styles.TableRow>
-            ))}
-          </tbody>
-        </styles.Table>
-      </div>
-    );
-  };
+            </styles.Tabs>
 
-  return (
-    <styles.Container>
-      {/* 탭 목록 */}
-      <styles.Tabs>
-        {tables.map((table) => (
-          <styles.Tab
-            key={table.id}
-            isActive={table.id === activeTab}
-            onClick={() => handleTabClick(table.id)}
-          >
-            {table.tableName}
-          </styles.Tab>
-        ))}
-      </styles.Tabs>
-
-      {/* 탭 내용 */}
-      <styles.Content>
-        {activeTab ? (
-          renderTableData()
-        ) : (
-          <p>테이블을 선택해주세요.</p>
-        )}
-      </styles.Content>
-    </styles.Container>
-  );
+            {/* 탭 내용 */}
+            <styles.Content>
+                {activeTab ? (
+                    // Sheet 컴포넌트를 불러오면서 현재 활성화 되어있는 테이블의 ID 값을 보냄
+                    <Sheet tableId = {activeTab}></Sheet>
+                ) : (
+                    <p>테이블을 선택해주세요.</p>
+                )}
+            </styles.Content>
+        </styles.Container>
+    )
 }
