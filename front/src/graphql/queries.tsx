@@ -1,14 +1,5 @@
 import { gql } from "@apollo/client";
-export const GET_WORKSPACE_BASES = gql`
-    query GetBasesByWorkspaceId($workspaceId: ID!) {
-      getBasesByWorkspaceId(workspaceId: $workspaceId) {
-      id
-      baseName
-      createdAt
-      updatedAt
-    }
-  }
-`
+// 모든 워크스페이스 읽어오기 
 export const GET_All_WORKSPACES = gql`
   query {
     getAllWorkspaces {
@@ -19,6 +10,18 @@ export const GET_All_WORKSPACES = gql`
     }
   }
 `;
+
+// 워크스페이스의 base들 이름 가져오기
+export const GET_WORKSPACE_BASES = gql`
+    query GetBasesByWorkspaceId($workspaceId: ID!) {
+      getBasesByWorkspaceId(workspaceId: $workspaceId) {
+      id
+      baseName
+      createdAt
+      updatedAt
+    }
+  }
+`
 
 // 워크스페이스 만들기
 export const CREATE_WORKSPACE = gql`
@@ -31,6 +34,28 @@ mutation CreateWorkspace($workspaceName: String!) {
     }
 }
 `
+
+// 워크스페이스 수정하기
+export const UPDATE_WORKSPACE = gql`
+    mutation UpdateWorkspace ($id: ID! ,$workspaceName: String! ) {
+    updateWorkspace(workspaceUpdateRequestDto: { id: $id, workspaceName: $workspaceName }) {
+        id
+        workspaceName
+        createdAt
+        updatedAt
+    }
+}
+`
+
+// 워크스페이스 삭제하기
+export const DELETE_WORKSPACE = gql`
+    mutation DeleteWorkspace($workspaceId: ID!)  {
+    deleteWorkspace(workspaceId: $workspaceId )
+}
+`
+
+
+
 
 export const GET_BASE_TABLES = gql`
 query GetTablesByBaseId($baseId:ID!) {

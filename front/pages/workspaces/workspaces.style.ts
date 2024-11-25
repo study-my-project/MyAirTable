@@ -60,8 +60,25 @@ export const CreateButton = styled.button`
   }
 `;
 
+export const CancelButton = styled.button`
+  margin-top: 24px;
+  padding: 12px 16px;
+  background-color: #3b82f6; /* Tailwind's blue-500 */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #2563eb; /* Tailwind's blue-600 */
+  }
+`;
+
+
 export const Input = styled.input`
-  width: 100%;
+  width: 90%;
   padding: 12px;
   margin-bottom: 16px;
   border: 1px solid #ccc;

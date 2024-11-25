@@ -1,15 +1,22 @@
 import { useQuery, useMutation } from "@apollo/client"
 import { useRouter } from "next/router";
 import type { Mutation, Query, QueryGetWorkspaceArgs, QueryGetBasesByWorkspaceIdArgs } from "../../src/commons/types/generated/types"
-import { GET_All_WORKSPACES, GET_WORKSPACE_BASES, CREATE_WORKSPACE } from "../../src/graphql/queries"
+import { GET_All_WORKSPACES, GET_WORKSPACE_BASES, CREATE_WORKSPACE, UPDATE_WORKSPACE, DELETE_WORKSPACE } from "../../src/graphql/queries"
 import * as styles from "./workspaces.style";
 import { useState, useEffect } from "react"
 import Modal from "../../src/components/Modal/CreateModal";
-
+// 모달 타입 정의
+type ModalType = "create" | "edit" | "viewBase" | "delete";
 export default function WorkspacePage() {
     const router = useRouter();
     const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null);
+    // 모달 열림 상태 여부
     const [isModalOpen, setIsModalOpen] = useState(false);
+    // 모달의 타입 
+    const [modalType, setModalType] = useState<ModalType>("create");
+    // 수정할 워크스페이스 이름
+    const [editWorkspaceName, setEditWorkspaceName] = useState("");
+
     // 받아온 워크스페이스를 저장할 useQuery
     const { loading, error, data } = useQuery<Pick<Query, "getAllWorkspaces">, QueryGetWorkspaceArgs>(GET_All_WORKSPACES)
 
@@ -17,7 +24,7 @@ export default function WorkspacePage() {
     const [newWorkspaceName, setNewWorkspaceName] = useState("");
 
     // 워크스페이스 ID를 통해서 베이스를 받아올 useQuery
-    const { data: baseData, loading: baseLoading } = useQuery<Pick<Query, "getBasesByWorkspaceId">, QueryGetBasesByWorkspaceIdArgs>(
+    const { data: baseData } = useQuery<Pick<Query, "getBasesByWorkspaceId">, QueryGetBasesByWorkspaceIdArgs>(
         // 조건부 쿼리실행하기
         GET_WORKSPACE_BASES, {
 
@@ -30,21 +37,45 @@ export default function WorkspacePage() {
     });
 
     // 워크스페이스를 생성할 뮤테이션
-    const [createWorkspace, { loading: createLoading, error: createError }] = useMutation<Pick<Mutation, "createWorkspace">>(
+    const [createWorkspace] = useMutation<Pick<Mutation, "createWorkspace">>(
         CREATE_WORKSPACE,
         {
             refetchQueries: [{ query: GET_All_WORKSPACES }], // 워크스페이스 생성 후 목록 갱신
         }
     );
 
+    // 워크스페이스를 수정할 뮤테이션
+    const [updateWorkspace] = useMutation<Pick<Mutation, "updateWorkspace">>(
+        UPDATE_WORKSPACE,
+        {
+            refetchQueries: [{ query: GET_All_WORKSPACES }],
+        }
+    )
 
+    // 워크스페이스를 삭제할 뮤테이션
+    const [deleteWorkspace] = useMutation<Pick<Mutation, "deleteWorkspace">>(
+        DELETE_WORKSPACE,
+        {
+            refetchQueries: [{ query: GET_All_WORKSPACES }],
+        }
+    )
 
-    // 카드를 누르면 동작할 기능 
-    const handleOpenModal = (workspaceId: string) => {
-        // 받아온 workspaceId 값을 따로 저장시킴
-        setSelectedWorkspaceId(workspaceId);
+    // 모달 열기 핸들러
+    const openModal = (type: ModalType, workspaceId?: string, workspaceName?: string) => {
+        setModalType(type);
+        setSelectedWorkspaceId(workspaceId || null);
+        setEditWorkspaceName(workspaceName || "");
         setIsModalOpen(true);
-    }
+    };
+
+    // 모달 닫기 핸들러
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedWorkspaceId(null);
+        setNewWorkspaceName("");
+        setEditWorkspaceName("");
+    };
+
 
     // 모달 닫기버튼 누를때 동작할 내용
     const handleCloseModal = () => {
@@ -111,6 +142,29 @@ export default function WorkspacePage() {
         };
     }, []);
 
+    // 워크스페이스 이름 수정하기 
+    const handleUpdateWorkspace = async () => {
+
+        // trim() = 문자열 양 끝의 공백제거
+        // 값이 비어있으면 그냥 종료
+        if (!editWorkspaceName.trim()) return;
+
+        try {
+            await updateWorkspace({
+                variables: {
+                    id: selectedWorkspaceId,
+                    workspaceName: editWorkspaceName,
+                },
+            });
+            handleCloseModal();
+        } catch (e) {
+            console.error("Error updating workspace:", e);
+        }
+    }
+
+
+    // 워크스페이스 삭제하기
+
     // 만약 workspace 목록을 불러올때 로딩이나 에러라면 해당 내용 출력
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error.message}</p>;
@@ -125,16 +179,13 @@ export default function WorkspacePage() {
                 {data?.getAllWorkspaces.map((workspace) => (
                     /* key 를 사용하지 않으면 어떤 항목이 추가, 제거, 수정되었는지 추적이 되지 않아 에러를 발생함*/
                     /* onClick 으로 해당 카드를 클릭하면 handleOpenModal함수에 해당 카드의 id값을 보내며 실행시킴 */
-                    <styles.WorkspaceCard key={workspace.id} onClick={() => handleOpenModal(workspace.id)}>
+                    <styles.WorkspaceCard key={workspace.id} onClick={() => openModal("viewBase", workspace.id)}>
                         {/* 워크스페이스의 이름을 출력 */}
                         <styles.WorkspaceTitle>{workspace.workspaceName}</styles.WorkspaceTitle>
                         <styles.WorkspaceUpdatedAt>
                             {/* {workspace.createdAt} 으로 출력하면  Created: 2024-11-18T16:43:53.031712  이런식으로 양식이 이상함
                            new Date(입력값).toLocaleDateString() 은 입력값을 날짜 형식으로 변환하는 자바스크립트 코드*/}
                             Created: {workspace.createdAt ? new Date(workspace.createdAt).toLocaleDateString() : "n/a"}
-                        </styles.WorkspaceUpdatedAt>
-                        <styles.WorkspaceUpdatedAt>
-                            Updated: {workspace.updatedAt ? new Date(workspace.updatedAt).toLocaleDateString() : "n/a"}
                         </styles.WorkspaceUpdatedAt>
                         <styles.MoreOptionsButton onClick={(e) => {
                             e.stopPropagation(); // 모달 열림 방지
@@ -147,8 +198,14 @@ export default function WorkspacePage() {
                         {openDropdownId === workspace.id && (
                             <styles.DropdownMenu>
                                 <styles.DropdownMenuUl>
-                                    <styles.DropdownMenuLi>수정</styles.DropdownMenuLi>
-                                    <styles.DropdownMenuLi>삭제</styles.DropdownMenuLi>
+                                    <styles.DropdownMenuLi onClick={(e) => {
+                                        e.stopPropagation(); // 이벤트 전파 중지
+                                        openModal("edit", workspace.id)
+                                    }}>수정</styles.DropdownMenuLi>
+                                    <styles.DropdownMenuLi onClick={(e) => {
+                                        e.stopPropagation();
+                                        openModal("delete", workspace.id)
+                                    }}>삭제</styles.DropdownMenuLi>
                                 </styles.DropdownMenuUl>
                             </styles.DropdownMenu>
                         )}
@@ -160,47 +217,16 @@ export default function WorkspacePage() {
 
             {/* 워크스페이스 생성 버튼 */}
             {/* 버튼 클릭시 IsModalOpen 을 true로 바꿈 */}
-            <styles.CreateButton onClick={() => setIsModalOpen(true)}>Create New Workspace</styles.CreateButton>
+            <styles.CreateButton onClick={() => openModal("create")}>
+                Create New Workspace
+            </styles.CreateButton>
 
 
             {/* 모달 */}
             {/* Modal의 isOpen 값은 isModalOpen의 값으로 만듬 (위의 생성 버튼 눌렀으면 true 아니면 false) */}
             {/* 모달 창을 닫으려 하면 (onClose) handleCloseModal 을 동작함  */}
-            <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-                {/* selectedWorkspaceId의 값이 있으면 */}
-                {selectedWorkspaceId ? (
-                    <>
-                        <h2>Workspace Bases</h2>
-                        {/* baseLoading 에 값이있음 = 로딩중 */}
-                        {baseLoading ? (
-                            <p>Loading...</p>
-                        ) : (
-                            // 로딩중이 아니면 
-                            <styles.BaseList>
-                                {/* 데이터 값들을 반복문 */}
-                                {baseData?.getBasesByWorkspaceId.map((base) => (
-                                    <styles.BaseItem
-                                        key={base.id}
-                                        // 해당 화면을 클릭하면 workspaces/base.id 로 이동시킴
-                                        onClick={() => router.push(`/workspaces/${base.id}`)}
-                                    >
-                                        <styles.BaseTitle>{base.baseName}</styles.BaseTitle>
-                                        <styles.BaseUpdatedAt>
-                                            Created: {base.createdAt ? new Date(base.createdAt).toLocaleDateString() : "N/A"}
-                                        </styles.BaseUpdatedAt>
-                                        <styles.BaseUpdatedAt>
-                                            Updated: {base.updatedAt ? new Date(base.updatedAt).toLocaleDateString() : "N/A"}
-                                        </styles.BaseUpdatedAt>
-                                    </styles.BaseItem>
-                                ))}
-                            </styles.BaseList>
-                        )}
-                    </>
-                ) : (
-                    // selectedWorkspaceId의 값이 없을 경우
-                    // 사실상 위의 base를 선택하는 버튼과 같지만
-                    // workspace를 선택해서 들어갔을경우 id값이 있어서 base 선택기능
-                    // 그냥 하단의 버튼을 눌러서 들어가면 CreateWorkspace 기능을 하도록 한것
+            <Modal isOpen={isModalOpen} onClose={closeModal}>
+                {modalType === "create" && (
                     <>
                         <h2>Create Workspace</h2>
                         <styles.Input
@@ -210,9 +236,64 @@ export default function WorkspacePage() {
                             onChange={(e) => setNewWorkspaceName(e.target.value)}
                         />
                         <styles.CreateButton onClick={handleCreateWorkspace}>
-                            {createLoading ? "Creating..." : "Create"}
+                            Create
                         </styles.CreateButton>
-                        {createError && <p>Error: {createError.message}</p>}
+                    </>
+                )}
+                {modalType === "edit" && (
+                    <>
+                        <h2>Edit Workspace</h2>
+                        <styles.Input
+                            type="text"
+                            placeholder="Workspace Name"
+                            value={editWorkspaceName}
+                            onChange={(e) => setEditWorkspaceName(e.target.value)}
+                        />
+                        <styles.CreateButton onClick={handleUpdateWorkspace}>
+                            Update
+                        </styles.CreateButton>
+                    </>
+                )}
+                {modalType === "viewBase" && (
+                    <>
+                        <h2>Workspace Bases</h2>
+                        <styles.BaseList>
+                            {/* 데이터 값들을 반복문 */}
+                            {baseData?.getBasesByWorkspaceId.map((base) => (
+                                <styles.BaseItem
+                                    key={base.id}
+                                    // 해당 화면을 클릭하면 workspaces/base.id 로 이동시킴
+                                    onClick={() => router.push(`/workspaces/${base.id}`)}
+                                >
+                                    <styles.BaseTitle>{base.baseName}</styles.BaseTitle>
+                                    <styles.BaseUpdatedAt>
+                                        Created: {base.createdAt ? new Date(base.createdAt).toLocaleDateString() : "N/A"}
+                                    </styles.BaseUpdatedAt>
+                                    <styles.BaseUpdatedAt>
+                                        Updated: {base.updatedAt ? new Date(base.updatedAt).toLocaleDateString() : "N/A"}
+                                    </styles.BaseUpdatedAt>
+                                </styles.BaseItem>
+                            ))}
+                        </styles.BaseList>
+                    </>
+                )}
+                {modalType === "delete" && (
+                    <>
+                        <h2>해당 스테이션을 삭제하시겠 습니까? [{data?.getAllWorkspaces.find(workspace => workspace.id === selectedWorkspaceId)?.workspaceName}] </h2>
+
+                        <styles.CreateButton onClick={async () => {
+                            if (selectedWorkspaceId) {
+                                try {
+                                    await deleteWorkspace({ variables: { workspaceId: selectedWorkspaceId } });
+                                    closeModal();
+                                } catch (e) {
+                                    console.error("Error deleting workspace:", e);
+                                }
+                            }
+                        }}>
+                            Delete
+                        </styles.CreateButton>
+                        <styles.CancelButton onClick={closeModal}>Cancel</styles.CancelButton>
                     </>
                 )}
             </Modal>
