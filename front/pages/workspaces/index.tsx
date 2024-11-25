@@ -52,7 +52,7 @@ export default function WorkspacePage() {
         setSelectedWorkspaceId(null);
     };
 
-
+    // 워크스페이스 만들기 
     const handleCreateWorkspace = async () => {
         // trim() = 문자열 양 끝의 공백제거
         // 값이 비어있으면 그냥 종료
@@ -77,45 +77,39 @@ export default function WorkspacePage() {
     };
 
 
-// 드롭다운 열기/닫기 상태를 단일 값으로 관리
-const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+    // 드롭다운 열기/닫기 상태를 단일 값으로 관리
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-// 드롭다운 열기/닫기 토글
-const toggleDropdown = (workspaceId: string) => {
-    setOpenDropdownId((prevId) => (prevId === workspaceId ? null : workspaceId));
-  };
-
-    // 옵션을 열 드롭다운 관리
-    const [dropdownStates, setDropdownStates] = useState<Record<string, boolean>>(
-        {}
-    );
-
-
-
-    // 드롭다운 외부 클릭 시 닫기
-    const handleDocumentClick = (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-        if (!target.closest(".workspace-card")) {
-            setDropdownStates({});
-        }
+    // 드롭다운 열기/닫기 토글
+    const toggleDropdown = (workspaceId: string) => {
+        // 해당 동작이 실행될때 기존에 있던값과 방금 입력한값이 같으면 null, 다르면 방금 입력받은 값을 보냄
+        setOpenDropdownId((prevId) => (prevId === workspaceId ? null : workspaceId));
     };
+
 
     // 외부 클릭 이벤트 등록
     // 드롭다운 외부 클릭 시 닫기
-useEffect(() => {
-    const handleDocumentClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest(".workspace-card")) {
-        setOpenDropdownId(null); // 모든 드롭다운 닫기
-      }
-    };
-  
-    document.addEventListener("click", handleDocumentClick);
-  
-    return () => {
-      document.removeEventListener("click", handleDocumentClick);
-    };
-  }, []);
+    // useEffect = 컴포넌트가 랜더링 된 후 특정 작업을 수행하도록 설정
+    useEffect(() => {
+        // 문서 전체에서 발생하는 클릭 이벤트 처리
+        const handleDocumentClick = (event: MouseEvent) => {
+            //  클릭된 HTML 요소를 가져옴
+            const target = event.target as HTMLElement;
+            //  클릭한 요소가 workspace-card 라는 요소 내부에 있는지 확인
+            if (!target.closest(".workspace-card")) {
+                // 요소 외부를 클릭했으면 열려있는 드롭다운 ID값을 null을 보내서 모든 드롭다운을 닫아버림
+                setOpenDropdownId(null);
+            }
+        };
+        //  문서의 클릭 이벤트를 전역으로 감지하도록 이벤트 리스너를 추가
+        document.addEventListener("click", handleDocumentClick);
+
+        // 여기서의 return은 useEffect의 정리 함수 
+        return () => {
+            // 이전에 등록된 이벤트 리스너를 제거 = 메모리 누수방지, 불필요 이벤트 제거
+            document.removeEventListener("click", handleDocumentClick);
+        };
+    }, []);
 
     // 만약 workspace 목록을 불러올때 로딩이나 에러라면 해당 내용 출력
     if (loading) return <p>Loading...</p>;
@@ -146,6 +140,10 @@ useEffect(() => {
                             e.stopPropagation(); // 모달 열림 방지
                             toggleDropdown(workspace.id);
                         }}>⋮</styles.MoreOptionsButton>
+                        {/* 각 워크스페이스마다 수정,삭제버튼이 담긴 옵션버튼 */}
+                        {/* 선택한 워크스페이스만 열리도록 어떤걸 선택했는지 확인 */}
+                        {/* 선택한 워크스페이스만 && 뒤의 내용이 나옴 */}
+                        {/* &&는 "왼쪽 조건이 true일 때만 오른쪽의 내용을 실행하거나 렌더링하라"는 의미 */}
                         {openDropdownId === workspace.id && (
                             <styles.DropdownMenu>
                                 <styles.DropdownMenuUl>
