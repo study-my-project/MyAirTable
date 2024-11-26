@@ -54,7 +54,42 @@ export const DELETE_WORKSPACE = gql`
 }
 `
 
+// 베이스 생성하기
+export const CREATE_BASE = gql`
+mutation CreateBase ($workspaceId:ID!, $baseName:String!){
+    createBase(baseCreateRequestDto: { workspaceId: $workspaceId, baseName: $baseName }) {
+        id
+        workspaceId
+        baseName
+        createdAt
+        updatedAt
+    }
+}
 
+`
+
+// 베이스 수정하기 ( 이름, 다른 워크스페이스로 이동)
+export const UPDATE_BASE = gql`
+    mutation UpdateBase ($id: ID!,$workspaceId:ID,$baseName:String ) {
+    updateBase(
+        baseUpdateRequestDto: { id: $id, workspaceId: $workspaceId, baseName: $baseName }
+    ) {
+        id
+        workspaceId
+        baseName
+        createdAt
+        updatedAt
+    }
+}
+`
+
+// 베이스 삭제하기
+export const DELETE_BASE = gql`
+    mutation DeleteBase($baseId: ID!) {
+    deleteBase(baseId: $baseId)
+}
+
+`
 
 
 export const GET_BASE_TABLES = gql`

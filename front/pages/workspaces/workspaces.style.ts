@@ -93,11 +93,16 @@ export const BaseList = styled.div`
 `;
 
 export const BaseItem = styled.div`
+
+display: flex;
+justify-content: space-between;
+align-items: center;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
   background: #f9f9f9;
   cursor: pointer;
+  position: relative;
 `;
 
 export const BaseTitle = styled.h3`
@@ -152,3 +157,44 @@ export const DropdownMenuLi = styled.div`
     background: #f5f5f5; /* 마우스를 올렸을 때 배경 색상 변경 */
   }
 `
+
+export const WorkspaceList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+export const WorkspaceItem = styled.div<{ selected?: boolean }>`
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  &:hover {
+    background-color: ${({ selected }) => (selected ? "#0056b3" : "#f0f0f0")};
+    color: ${({ selected }) => (selected ? "white" : "black")};
+  }
+  background-color: ${({ selected }) => (selected ? "#007BFF" : "white")};
+  color: ${({ selected }) => (selected ? "white" : "black")};
+  border: ${({ selected }) => (selected ? "2px solid #007BFF" : "1px solid #ccc")};
+`;
+
+export const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+export const NewBaseButton = styled.button`
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;

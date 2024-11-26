@@ -29,8 +29,9 @@ export type BaseCreateRequestDto = {
 };
 
 export type BaseUpdateRequestDto = {
-  Id: Scalars['ID']['input'];
-  baseName: Scalars['String']['input'];
+  baseName?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  workspaceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type CellValue = {

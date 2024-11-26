@@ -36,6 +36,9 @@ public class Base extends BaseEntity {
         if(baseUpdateRequestDto.getBaseName() != null) {
             this.baseName = baseUpdateRequestDto.getBaseName();
         }
+        if(baseUpdateRequestDto.getWorkspaceId() != null) {
+            this.workspaceId = baseUpdateRequestDto.getWorkspaceId();
+        }
     }
 
 }

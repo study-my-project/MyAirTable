@@ -71,8 +71,9 @@ input BaseCreateRequestDto {
     baseName: String!
 }
 input BaseUpdateRequestDto {
-    Id: ID!
-    baseName: String!
+    id: ID!
+    workspaceId : ID
+    baseName: String
 }
 
 input TableCreateRequestDto{
