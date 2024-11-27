@@ -5,7 +5,6 @@ import { GET_All_WORKSPACES, GET_WORKSPACE_BASES, CREATE_WORKSPACE, UPDATE_WORKS
 import * as styles from "./workspaces.style";
 import { useState, useEffect } from "react"
 import Modal from "../../src/components/Modal/CreateModal";
-import { create } from "domain";
 // 모달 타입 정의
 type ModalType = "create" | "edit" | "viewBase" | "delete" | "create_base" | "edit_base" | "delete_base" | "move_base";
 export default function WorkspacePage() {
@@ -162,7 +161,7 @@ export default function WorkspacePage() {
     };
 
 
-    // 뮤테이션 만들기
+    // 베이스 만들기
     const handleCreateBase = async () => {
           // trim() = 문자열 양 끝의 공백제거
         // 값이 비어있으면 그냥 종료

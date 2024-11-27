@@ -91,9 +91,9 @@ export const DELETE_BASE = gql`
 
 `
 
-
+// 베이스의 테이블들을 가져옴
 export const GET_BASE_TABLES = gql`
-query GetTablesByBaseId($baseId:ID!) {
+query GetTablesByBaseId($baseId: ID!) {
     getTablesByBaseId(baseId: $baseId) {
         id
         baseId
@@ -104,7 +104,43 @@ query GetTablesByBaseId($baseId:ID!) {
 }
 
 `
+// 테이블 생성
+export const CREATE_TABLE = gql`
+    mutation CreateTable($baseId: ID!,$tableName: String! ) {
+    createTable(tableCreateRequestDto: { baseId: $baseId, tableName: $tableName }) {
+        id
+        baseId
+        tableName
+        createdAt
+        updatedAt
+    }
+}
 
+`
+
+// // 테이블 수정
+export const UPDATE_TABLE = gql`
+    mutation UpdateTable ($id: ID! , $tableName: String!) {
+    updateTable(tableUpdateRequestDto: { id: $id, tableName: $tableName }) {
+        id
+        baseId
+        tableName
+        createdAt
+        updatedAt
+    }
+}
+
+`
+// // 테이블 삭제
+export const DELETE_TABLE = gql`
+    mutation DeleteTable($tableId:ID!) {
+    deleteTable(tableId: $tableId)
+}
+
+`
+
+
+// 테이블의 상세 내용을 가져옴
 export const GET_TABLE_DETAILS = gql`
 query GetTableDetailsById($tableId:ID!) {
     getTableDetailsById(tableId: $tableId) {
