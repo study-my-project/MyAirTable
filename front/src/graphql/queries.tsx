@@ -153,7 +153,13 @@ export const CREATE_FIELD = gql`
         updatedAt
     }
 }
+`
 
+// 필드 삭제
+export const DELETE_FIELD = gql`
+    mutation DeleteField ($fieldId:ID!){
+    deleteField(fieldId: $fieldId)
+}
 `
 
 // 레코드 생성
@@ -165,6 +171,12 @@ export const CREATE_RECORD = gql`
         createdAt
         updatedAt
     }
+}
+`
+// 레코드 삭제
+export const DELETE_RECORD = gql`
+    mutation DeleteRecord ($recordId:ID!){
+    deleteRecord(recordId: $recordId)
 }
 
 `

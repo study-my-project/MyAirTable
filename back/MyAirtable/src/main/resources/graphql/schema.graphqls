@@ -47,8 +47,12 @@ type Mutation {
 
     # 필드 생성
     createField(fieldCreateRequestDto: FieldCreateRequestDto!) : Field!
+    # 필드 삭제
+    deleteField(fieldId:ID!) : Boolean!
     # 레코드 생성
     createRecord(recordCreateRequestDto: RecordCreateRequestDto!) : Record!
+    # 레코드 삭제
+    deleteRecord(recordId : ID!) : Boolean!
     # CellValue 생성
     createCellValue(cellValueCreateRequestDto: CellValueCreateRequestDto!) : CellValue!
     # CellValue 수정

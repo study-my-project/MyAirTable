@@ -96,6 +96,10 @@ export type Mutation = {
   createWorkspace: Workspace;
   /**  Base 삭제 */
   deleteBase: Scalars['Boolean']['output'];
+  /**  필드 삭제 */
+  deleteField: Scalars['Boolean']['output'];
+  /**  레코드 삭제 */
+  deleteRecord: Scalars['Boolean']['output'];
   /**  테이블 삭제 */
   deleteTable: Scalars['Boolean']['output'];
   /**  Workspace 삭제 (논리 삭제) */
@@ -143,6 +147,16 @@ export type MutationCreateWorkspaceArgs = {
 
 export type MutationDeleteBaseArgs = {
   baseId: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteFieldArgs = {
+  fieldId: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteRecordArgs = {
+  recordId: Scalars['ID']['input'];
 };
 
 

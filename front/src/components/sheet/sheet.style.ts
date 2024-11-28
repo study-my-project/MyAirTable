@@ -58,3 +58,37 @@ export const context_menu_item = styled.li`
     background: #f0f0f0;
   }
 `;
+
+export const create_button = styled.button`
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  margin: 5px;
+  cursor: pointer;
+  border-radius: 3px;
+  width:80px;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+`;
+
+export const ContextMenu = styled.div`
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 8px;
+`;
+
+export const ContextMenuItem = styled.div`
+    padding: 8px 12px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #f0f0f0;
+    }
+`;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as styles from "./sheet.style";
-import { CREATE_CELL_VALUE, GET_TABLE_DETAILS, UPDATE_CELL_VALUE } from "../../../src/graphql/queries";
+import { CREATE_CELL_VALUE, GET_TABLE_DETAILS, UPDATE_CELL_VALUE, CREATE_FIELD, CREATE_RECORD, DELETE_FIELD, DELETE_RECORD } from "../../../src/graphql/queries";
 import { useMutation, useQuery } from "@apollo/client";
 import type {
     QueryGetTableDetailsByIdArgs,
@@ -10,10 +10,6 @@ import type {
 } from "../../../src/commons/types/generated/types";
 
 export default function Sheet({ tableId }: { tableId: string }) {
-
-    // 행, 열을 추가할 곳
-    // const [fields, setFields] = useState(tableDetailsData?.getTableDetailsById.fields || []);
-    // const [records, setRecords] = useState(tableDetailsData?.getTableDetailsById.records || []);
 
     // 현재 선택된 테이블 ID 상태
     const [activeTable, setActiveTable] = useState<string | null>(null);
@@ -32,13 +28,6 @@ export default function Sheet({ tableId }: { tableId: string }) {
         skip: !activeTable,
     });
 
-    // tableDetailsData 변경 시 fields와 records를 업데이트
-    // useEffect(() => {
-    //     if (tableDetailsData?.getTableDetailsById) {
-    //         setFields(tableDetailsData.getTableDetailsById.fields || []);
-    //         setRecords(tableDetailsData.getTableDetailsById.records || []);
-    //     }
-    // }, [tableDetailsData]);
     // 값을 입력 받을 수 있도록 셀 값을 프론트에 바로 넣는게 아닌 useState로 로컬 상태를 만들자.
     const [cellValues, setCellValues] = useState<
         { fieldId: string; recordId: string; value: string }[]
@@ -63,6 +52,110 @@ export default function Sheet({ tableId }: { tableId: string }) {
             refetchQueries: [{ query: GET_TABLE_DETAILS }]
         }
     )
+    const [createField] = useMutation<Pick<Mutation, "createField">>(CREATE_FIELD, {
+        refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
+    });
+
+    const [createRecord] = useMutation<Pick<Mutation, "createRecord">>(CREATE_RECORD, {
+        refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
+    });
+
+    const [deleteField] = useMutation<Pick<Mutation,"deleteField">>(DELETE_FIELD,{
+        refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
+    })
+    const [deleteRecord] = useMutation<Pick<Mutation,"deleteRecord">>(DELETE_RECORD,{
+        refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
+    })
+
+
+    // 필드 추가
+    const handleCreateField = async () => {
+        try {
+            const fieldCount =
+                tableDetailsData?.getTableDetailsById?.fields?.length || 0; // 안전하게 필드 수를 가져옴
+            const response = await createField({
+                variables: {
+                    tableId,
+                    fieldName: `필드 ${fieldCount + 1}`, // 필드 수를 기반으로 새 필드 이름 생성
+                },
+            });
+            console.log("Field added:", response);
+        } catch (error) {
+            console.error("Error adding field:", error);
+        }
+    };
+
+    // 레코드 추가
+    const handleCreateRecord = async () => {
+        try {
+            const recordCount =
+                tableDetailsData?.getTableDetailsById?.records?.length || 0;
+            const response = await createRecord({
+                variables: {
+                    tableId,
+                    recordIndex: `레코드 ${recordCount + 1}`,
+                },
+            });
+            console.log("Record added:", response);
+        } catch (error) {
+            console.error("Error adding record:", error);
+        }
+    };
+
+
+    // 컨텍스트 메뉴 상태
+    const [contextMenu, setContextMenu] = useState<{
+        x: number;
+        y: number;
+        type: "field" | "record" | null;
+        id: string | null;
+    } | null>(null);
+
+    // 컨텍스트 메뉴 열기
+    const handleContextMenu = (
+        e: React.MouseEvent,
+        type: "field" | "record",
+        id: string
+    ) => {
+        e.preventDefault();
+        setContextMenu({
+            x: e.clientX,
+            y: e.clientY,
+            type,
+            id,
+        });
+    };
+
+    // 컨텍스트 메뉴 닫기
+    const closeContextMenu = () => {
+        setContextMenu(null);
+    };
+
+    // 필드 삭제
+    const handleDeleteField = async () => {
+        if (contextMenu?.type === "field" && contextMenu.id) {
+            try {
+                await deleteField({ variables: { fieldId: contextMenu.id } });
+                closeContextMenu();
+            } catch (error) {
+                console.error("Error deleting field:", error);
+            }
+        }
+    };
+
+    // 레코드 삭제
+    const handleDeleteRecord = async () => {
+        if (contextMenu?.type === "record" && contextMenu.id) {
+            try {
+                await deleteRecord({ variables: { recordId: contextMenu.id } });
+                closeContextMenu();
+            } catch (error) {
+                console.error("Error deleting record:", error);
+            }
+        }
+    };
+
+
 
 
     // 셀에 값을 입력하기
@@ -144,10 +237,18 @@ export default function Sheet({ tableId }: { tableId: string }) {
                             {/* 테이블 디테일 내용중 field의 이름으로 나열하기  */}
                             {tableDetailsData?.getTableDetailsById.fields.map((field) => (
                                 <styles.excel_table_th
-                                    key={field.id}>
+                                    key={field.id}
+                                    onContextMenu={(e) =>
+                                        handleContextMenu(e, "field", field.id)
+                                    }>
                                     {field.fieldName}
                                 </styles.excel_table_th>
                             ))}
+
+                            {/* 필드 추가 버튼 */}
+                            <styles.excel_table_th>
+                                <styles.create_button onClick={handleCreateField}>+ 필드</styles.create_button>
+                            </styles.excel_table_th>
                         </tr>
                     </thead>
                     <tbody>
@@ -155,7 +256,10 @@ export default function Sheet({ tableId }: { tableId: string }) {
                         {tableDetailsData?.getTableDetailsById.records.map((record) => (
                             <tr key={record.id}>
                                 {/* 각 레코드의 첫 번째 셀에는 record.Index 값 */}
-                                <styles.excel_table_td>
+                                <styles.excel_table_td
+                                    onContextMenu={(e) =>
+                                        handleContextMenu(e, "record", record.id)
+                                    }>
                                     {record.recordIndex}
                                 </styles.excel_table_td>
 
@@ -181,10 +285,38 @@ export default function Sheet({ tableId }: { tableId: string }) {
                                 })}
                             </tr>
                         ))}
+                        {/* 레코드 추가 버튼 */}
+                        <tr>
+                            <styles.excel_table_td colSpan={(tableDetailsData?.getTableDetailsById?.fields?.length || 0) + 1}>
+                                <styles.create_button onClick={handleCreateRecord}>+ 레코드</styles.create_button>
+                            </styles.excel_table_td>
+                        </tr>
                     </tbody>
 
                 </styles.excel_table>
             </styles.excel_container>
+
+            {/* 컨텍스트 메뉴 */}
+            {contextMenu && (
+                <styles.ContextMenu style={{ top: contextMenu.y, left: contextMenu.x }}>
+                    {contextMenu.type === "field" && (
+                        <styles.ContextMenuItem onClick={handleDeleteField}>
+                            필드 삭제
+                        </styles.ContextMenuItem>
+                    )}
+                    {contextMenu.type === "record" && (
+                        <styles.ContextMenuItem onClick={handleDeleteRecord}>
+                            레코드 삭제
+                        </styles.ContextMenuItem>
+                    )}
+                    <styles.ContextMenuItem onClick={closeContextMenu}>
+                        닫기
+                    </styles.ContextMenuItem>
+                </styles.ContextMenu>
+            )}
+
+
+
         </>
 
     )
