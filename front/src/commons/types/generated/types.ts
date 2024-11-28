@@ -64,6 +64,7 @@ export type CellValueUpdateRequestDto = {
 export type Field = {
   __typename?: 'Field';
   createdAt?: Maybe<Scalars['String']['output']>;
+  fieldIndex: Scalars['Int']['output'];
   fieldName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   options: Scalars['String']['output'];
@@ -240,6 +241,7 @@ export type Record = {
   __typename?: 'Record';
   createdAt?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  recordIndex: Scalars['Int']['output'];
   tableId: Scalars['ID']['output'];
   updatedAt?: Maybe<Scalars['String']['output']>;
 };

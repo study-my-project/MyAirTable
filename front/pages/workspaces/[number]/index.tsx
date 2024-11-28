@@ -7,7 +7,7 @@ import type {
     Mutation
 } from "../../../src/commons/types/generated/types";
 import * as styles from "./tablePage.style";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Sheet from "../../../src/components/sheet"
 
 // 모달 타입 정의
@@ -148,11 +148,11 @@ export default function TablePage() {
 
 
             // Step 3: 10개의 레코드 생성
-        
-            for( let i = 0 ; i < 10 ; i ++ ){
-                await createRecord ({
+
+            for (let i = 0; i < 10; i++) {
+                await createRecord({
                     variables: {
-                        tableId : newTableId,
+                        tableId: newTableId,
                     },
                 })
             }
@@ -246,11 +246,30 @@ export default function TablePage() {
         console.log(tabId)
     };
 
+    // 탭 좌우 스크롤
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+    const scrollLeft = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({ left: -100, behavior: "smooth" });
+        }
+    };
+
+    const scrollRight = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollBy({ left: 100, behavior: "smooth" });
+        }
+    };
     return (
         <styles.Container>
             {/* 탭 목록 */}
             <styles.TabHeader>
-                <styles.Tabs>
+
+                    <styles.AddTabButton onClick={() => openModal({ type: "create_table" })}>
+                        +
+                    </styles.AddTabButton>
+
+                <styles.Tabs ref={scrollContainerRef}>
                     {/* tables의 데이터 수만큼 반복 */}
                     {tables.map((table) => (
                         <styles.Tab
@@ -265,11 +284,11 @@ export default function TablePage() {
                             {table.tableName}
                         </styles.Tab>
                     ))}
+                
                 </styles.Tabs>
+                <styles.ScrollLeftButton onClick={scrollLeft}>{"<"}</styles.ScrollLeftButton>
 
-                <styles.AddTabButton onClick={() => openModal({ type: "create_table" })}>
-                    +
-                </styles.AddTabButton>
+                <styles.ScrollRightButton onClick={scrollRight}>{">"}</styles.ScrollRightButton>
             </styles.TabHeader>
             {/* 탭 내용 */}
             <styles.Content>

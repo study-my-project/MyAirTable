@@ -13,29 +13,23 @@ export const Container = styled.div`
 // 탭 컨테이너
 export const Tabs = styled.div`
   display: flex;
-  border-bottom: 2px solid #ddd;
-  margin-bottom: 16px;
-  gap: 8px;
+  overflow-x: hidden; /* 스크롤 막대를 숨김 */
+  flex: 1;
+  position: relative;
+  margin: 0 5px; /* 좌우 버튼 공간 확보 */
+  scroll-behavior: smooth; /* 부드러운 스크롤 */
 `;
 
 // 개별 탭
 export const Tab = styled.button<{ isActive: boolean }>`
-    background-color: ${({ isActive }) => (isActive ? "#d6d6d6" : "#f0f0f0")};
-    border: none;
-    border-radius: 4px;
-    color: #333;
+    display: inline-block;
+    padding: 10px 20px;
     cursor: pointer;
-    font-size: 14px;
-    padding: 8px 12px;
-    width: 130px;
-
-  &:hover {
-    color: #0056b3;
-  }
-
-  &:focus {
-    outline: none;
-  }
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 8px;
+    background-color: ${(props) => (props.isActive ? "#ddd" : "white")};
+    white-space: nowrap;
 `;
 
 
@@ -49,26 +43,44 @@ export const Content = styled.div`
   background-color: #fff;
 `;
 export const AddTabButton = styled.button`
-    background-color: #e0e0e0;
-    border: none;
-    border-radius: 4px;
-    color: #333;
+    padding: 10px 20px;
+    margin-left: 8px;
     cursor: pointer;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    white-space: nowrap;
+`;
 
-    &:hover {
-        background-color: #d6d6d6;
-    }
+export const ScrollButton = styled.button`
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 30px; /* 버튼 크기 */
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+`;
+export const ScrollLeftButton = styled(ScrollButton)`
+      left: 0; /* 탭 목록 왼쪽 외부로 위치 */
+`;
+
+export const ScrollRightButton = styled(ScrollButton)`
+    right: 0; /* 탭 목록 오른쪽 외부로 위치 */
 `;
 
 export const TabHeader = styled.div`
-    display: flex;
+   display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 8px;
-    margin-bottom: 16px;
+    justify-content: space-between; /* 좌우 버튼을 구분 */
+    overflow: hidden; /* 탭 목록이 화면 밖으로 나가지 않도록 */
+    white-space: nowrap;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 0;
+    position: relative;
 `;
 
 

@@ -154,9 +154,9 @@ export default function Sheet({ tableId }: { tableId: string }) {
                         {/* 세로는 records */}
                         {tableDetailsData?.getTableDetailsById.records.map((record) => (
                             <tr key={record.id}>
-                                {/* 각 레코드의 첫 번째 셀에는 record.id 값 */}
+                                {/* 각 레코드의 첫 번째 셀에는 record.Index 값 */}
                                 <styles.excel_table_td>
-                                    {record.id}
+                                    {record.recordIndex}
                                 </styles.excel_table_td>
 
                                 {/* 각 필드에 대해 값 출력 */}

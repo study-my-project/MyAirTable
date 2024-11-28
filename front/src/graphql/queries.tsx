@@ -182,12 +182,14 @@ query GetTableDetailsById($tableId:ID!) {
             fieldName
             type
             options
+            fieldIndex
             createdAt
             updatedAt
         }
         records {
             id
             tableId
+            recordIndex
             createdAt
             updatedAt
         }
