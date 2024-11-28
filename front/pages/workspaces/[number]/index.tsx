@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_BASE_TABLES, CREATE_TABLE, UPDATE_TABLE, DELETE_TABLE } from "../../../src/graphql/queries";
+import { GET_BASE_TABLES, CREATE_TABLE, UPDATE_TABLE, DELETE_TABLE, CREATE_FIELD, CREATE_RECORD } from "../../../src/graphql/queries";
 import type {
     QueryGetTablesByBaseIdArgs,
     Query,
@@ -43,6 +43,22 @@ export default function TablePage() {
             refetchQueries: [{ query: GET_BASE_TABLES, variables: { baseId } }], // 워크스페이스 생성 후 목록 갱신
         }
     );
+
+    // 필드생성
+    const [createField] = useMutation<Pick<Mutation, "createField">>(
+        CREATE_FIELD,
+        {
+            refetchQueries: [{ query: GET_BASE_TABLES, variables: { baseId } }], // 워크스페이스 생성 후 목록 갱신
+        }
+    )
+    // 레코드 생성
+    const [createRecord] = useMutation<Pick<Mutation, "createRecord">>(
+        CREATE_RECORD,
+        {
+            refetchQueries: [{ query: GET_BASE_TABLES, variables: { baseId } }], // 워크스페이스 생성 후 목록 갱신
+        }
+    )
+
 
     // 테이블 수정 뮤테이션
     const [updateTable] = useMutation<Pick<Mutation, "updateTable">>(UPDATE_TABLE, {
@@ -88,15 +104,71 @@ export default function TablePage() {
         }
 
         try {
-            await createTable({
+            // Step 1: 테이블 생성
+            const { data } = await createTable({
                 variables: {
                     baseId,
                     tableName: newTableName,
                 },
             });
+
+            const newTableId = data?.createTable.id;
+
+            if (!newTableId) {
+                throw new Error("테이블 생성 실패: ID를 가져올 수 없습니다.");
+            }
+
+            // Step 2: 10개의 필드 생성
+            for (let i = 0; i < 10; i++) {
+                await createField({
+                    variables: {
+                        tableId: newTableId,
+                        fieldName: `필드 ${i + 1}`,
+                        type: "text",
+                        options: JSON.stringify({ optionKey: `옵션값 ${i + 1}` }),
+                    },
+                });
+            }
+
+            // for루프, promise.all 차이점
+            // 비동기 작업의 실행 방식과 효율성에서 차이를 보임
+            // for루프는 await와 함께 사용하면 비동기 작업이 순차적으로 실행됨 
+            // 하나의 작업이 끝나고 다음 작없을 시행해서 동기실행방식에 가까움
+            //  병령이 불가능해서 속도가 느릴 수 있음
+
+            // promise.all
+            // 여러 비동기 작업이 병렬로 실행됨
+            // 모든작업이 동시시작, 모든 작업이 완료까지 기다림,
+            // 작업 순서가 보장되지 않음
+            // 병렬이므로 속도는 빠름
+            // 중복문제 발생 가능성이 있음. 
+
+            // 여기서 Record, Field의 생성의 경우
+            // 순차적으로 index의 값을 넣어줘야 하기에 for 루프문 방식을 채택함.
+
+
+            // Step 3: 10개의 레코드 생성
+        
+            for( let i = 0 ; i < 10 ; i ++ ){
+                await createRecord ({
+                    variables: {
+                        tableId : newTableId,
+                    },
+                })
+            }
+            // const recordPromises = Array.from({ length: 10 }, () =>
+            //     createRecord({
+            //         variables: {
+            //             tableId: newTableId,
+            //         },
+            //     })
+            // );
+
+            // await Promise.all(recordPromises);
+
             setNewTableName(""); // 입력값 초기화
             closeModal(); // 모달 닫기
-            alert("새로운 테이블이 생성되었습니다.");
+            alert("새로운 테이블과 10개의 필드, 10개의 레코드가 생성되었습니다.");
         } catch (error) {
             console.error(error);
             alert("테이블 생성 중 오류가 발생했습니다.");
@@ -105,7 +177,7 @@ export default function TablePage() {
     ///
     // 테이블 수정 기능 핸들러
     const handleEditTable = async () => {
-        
+
         console.log(selectedTableId)
         console.log(newTableName)
         if (!newTableName || !selectedTableId) {

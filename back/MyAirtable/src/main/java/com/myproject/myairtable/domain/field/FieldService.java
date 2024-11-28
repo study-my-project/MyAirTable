@@ -16,8 +16,13 @@ public class FieldService {
 
     // Create
     public Field createField(FieldCreateRequestDto fieldCreateRequestDto) {
-        Field field = new Field(fieldCreateRequestDto);
-        return fieldRepository.save(field);
+        synchronized (this) { // 동기화 처리로 값 충돌 방지
+            int currentFieldCount = fieldRepository.countByTableId(fieldCreateRequestDto.getTableId());
+            int newFieldIndex = currentFieldCount + 1;
+
+            Field field = new Field(fieldCreateRequestDto, newFieldIndex);
+            return fieldRepository.save(field);
+        }
     }
 
     // Read - 해당 테이블의 모든 Field 목록으로 보기

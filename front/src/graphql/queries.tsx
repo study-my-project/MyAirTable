@@ -138,6 +138,38 @@ export const DELETE_TABLE = gql`
 }
 
 `
+// 필드 생성
+export const CREATE_FIELD = gql`
+    mutation CreateField ($tableId:ID!, $fieldName:String!, $type:String!, $options:String! ) {
+    createField(
+        fieldCreateRequestDto: { tableId: $tableId, fieldName: $fieldName, type: $type, options: $options }
+    ) {
+        id
+        tableId
+        fieldName
+        type
+        options
+        createdAt
+        updatedAt
+    }
+}
+
+`
+
+// 레코드 생성
+export const CREATE_RECORD = gql`
+    mutation CreateRecord ($tableId:ID!){
+    createRecord(recordCreateRequestDto: { tableId: $tableId }) {
+        id
+        tableId
+        createdAt
+        updatedAt
+    }
+}
+
+`
+
+
 
 
 // 테이블의 상세 내용을 가져옴

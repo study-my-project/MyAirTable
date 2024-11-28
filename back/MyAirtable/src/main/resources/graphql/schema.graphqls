@@ -142,6 +142,7 @@ type Field{
     id: ID!
     tableId: ID!
     fieldName : String!
+    fieldIndex : Int!
     type : String!
     options: String!
     createdAt: String
@@ -151,6 +152,7 @@ type Field{
 type Record{
     id : ID!
     tableId: ID!
+    recordIndex : Int!
     createdAt: String
     updatedAt: String
 }

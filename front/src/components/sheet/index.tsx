@@ -11,6 +11,9 @@ import type {
 
 export default function Sheet({ tableId }: { tableId: string }) {
 
+    // 행, 열을 추가할 곳
+    // const [fields, setFields] = useState(tableDetailsData?.getTableDetailsById.fields || []);
+    // const [records, setRecords] = useState(tableDetailsData?.getTableDetailsById.records || []);
 
     // 현재 선택된 테이블 ID 상태
     const [activeTable, setActiveTable] = useState<string | null>(null);
@@ -29,6 +32,13 @@ export default function Sheet({ tableId }: { tableId: string }) {
         skip: !activeTable,
     });
 
+    // tableDetailsData 변경 시 fields와 records를 업데이트
+    // useEffect(() => {
+    //     if (tableDetailsData?.getTableDetailsById) {
+    //         setFields(tableDetailsData.getTableDetailsById.fields || []);
+    //         setRecords(tableDetailsData.getTableDetailsById.records || []);
+    //     }
+    // }, [tableDetailsData]);
     // 값을 입력 받을 수 있도록 셀 값을 프론트에 바로 넣는게 아닌 useState로 로컬 상태를 만들자.
     const [cellValues, setCellValues] = useState<
         { fieldId: string; recordId: string; value: string }[]

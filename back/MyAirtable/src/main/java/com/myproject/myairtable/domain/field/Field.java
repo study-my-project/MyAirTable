@@ -37,11 +37,16 @@ public class Field extends BaseEntity {
     @Column(name = "options", columnDefinition = "json")
     private String options;
 
-    public Field (FieldCreateRequestDto fieldCreateRequestDto) {
+    // 몇번째 데이터인지, 자리바꾸기 등에 사용할 index
+    @Column(name = "field_index", nullable = false)
+    private int fieldIndex;
+
+    public Field (FieldCreateRequestDto fieldCreateRequestDto, int fieldIndex) {
         this.tableId = fieldCreateRequestDto.getTableId();
         this.fieldName = fieldCreateRequestDto.getFieldName();
         this.type = fieldCreateRequestDto.getType();
         this.options = fieldCreateRequestDto.getOptions();
+        this.fieldIndex = fieldIndex;
     }
 
     public void updateField (FieldUpdateRequestDto fieldUpdateRequestDto) {

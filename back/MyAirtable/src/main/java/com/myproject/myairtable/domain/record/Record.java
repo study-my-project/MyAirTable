@@ -22,7 +22,12 @@ public class Record extends BaseEntity {
     @Column(name = "table_id", nullable = false)
     private Long tableId;
 
-    public Record (RecordCreateRequestDto RecordCreateRequestDto) {
+    // 몇번째 데이터인지, 자리바꾸기 등에 사용할 index
+    @Column(name = "record_index", nullable = false)
+    private int recordIndex;
+
+    public Record (RecordCreateRequestDto RecordCreateRequestDto, int recordIndex) {
         this.tableId = RecordCreateRequestDto.getTableId();
+        this.recordIndex = recordIndex;
     }
 }

@@ -14,8 +14,13 @@ public class RecordService {
 
     // Create
     public Record createRecord(RecordCreateRequestDto recordCreateRequestDto) {
-        Record record = new Record(recordCreateRequestDto);
-        return recordRepository.save(record);
+        synchronized (this) {
+            int currentRecordCount = recordRepository.countByTableID(recordCreateRequestDto.getTableId());
+            int newRecordCount = currentRecordCount + 1;
+            Record record = new Record(recordCreateRequestDto, newRecordCount);
+            return recordRepository.save(record);
+        }
+
     }
 
     // Read - 해당 테이블의 모든 Field 목록으로 보기
