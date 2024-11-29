@@ -12,6 +12,10 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     int countByTableID(@Param("tableId") Long tableId);
 
     // 논리적으로 삭제되지 않은 Record만 조회
-    @Query("SELECT w FROM Record w WHERE w.tableId = :tableId AND w.deletedAt IS NULL")
-    List<Record> findByTableId(@Param("tableId") Long tableId);
+    @Query("SELECT r FROM Record r WHERE r.tableId = :tableId AND r.deletedAt IS NULL ORDER BY r.recordIndex ASC")
+    List<Record> findByTableIdOrderByRecordIndex(@Param("tableId") Long tableId);
+
+    //특정 테이블의 논리적으로 삭제되지 않은 레코드를 인덱스로 조회
+    @Query("SELECT r FROM Record r WHERE r.tableId = :tableId AND r.recordIndex = :recordIndex AND r.deletedAt IS NULL")
+    Record findByTableIdAndRecordIndex(@Param("tableId") Long tableId, @Param("recordIndex") int recordIndex);
 }

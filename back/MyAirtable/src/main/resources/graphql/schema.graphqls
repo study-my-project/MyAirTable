@@ -51,12 +51,18 @@ type Mutation {
     deleteField(fieldId:ID!) : Boolean!
     # 레코드 생성
     createRecord(recordCreateRequestDto: RecordCreateRequestDto!) : Record!
+    # 레코드 순서 변경
+    updateRecordIndex(recordIndexUpdateRequestDto: RecordIndexUpdateRequestDto!) : Boolean!
     # 레코드 삭제
     deleteRecord(recordId : ID!) : Boolean!
     # CellValue 생성
     createCellValue(cellValueCreateRequestDto: CellValueCreateRequestDto!) : CellValue!
     # CellValue 수정
     updateCellValue(cellValueUpdateRequestDto: CellValueUpdateRequestDto!) : CellValue!
+}
+input RecordIndexUpdateRequestDto{
+    recordId:ID!
+    newIndex: Int!
 }
 
 input WorkspaceCreateRequestDto {

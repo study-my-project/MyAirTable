@@ -30,4 +30,9 @@ public class Record extends BaseEntity {
         this.tableId = RecordCreateRequestDto.getTableId();
         this.recordIndex = recordIndex;
     }
+
+    public void updateRecordIndex(int newIndex) {
+        this.recordIndex = newIndex;
+    }
+
 }

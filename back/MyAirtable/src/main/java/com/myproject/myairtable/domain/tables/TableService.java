@@ -42,7 +42,7 @@ public class TableService {
         Field[] fields = fieldsList.toArray(new Field[0]);
 
         // 테이블에 속한 레코드들 가져오기
-        List<Record> recordsList = recordRepository.findByTableId(tableId);
+        List<Record> recordsList = recordRepository.findByTableIdOrderByRecordIndex(tableId);
         Record[] records = recordsList.toArray(new Record[0]);
 
         // 셀 값 가져오기 필드, 레코드의 ID 값을 사용함

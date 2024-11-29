@@ -108,6 +108,8 @@ export type Mutation = {
   updateBase: Base;
   /**  CellValue 수정 */
   updateCellValue: CellValue;
+  /**  레코드 순서 변경 */
+  updateRecordIndex: Scalars['Boolean']['output'];
   /**  테이블 업데이트 */
   updateTable: Table;
   /**  Workspace 업데이트 */
@@ -177,6 +179,11 @@ export type MutationUpdateBaseArgs = {
 
 export type MutationUpdateCellValueArgs = {
   cellValueUpdateRequestDto: CellValueUpdateRequestDto;
+};
+
+
+export type MutationUpdateRecordIndexArgs = {
+  recordIndexUpdateRequestDto: RecordIndexUpdateRequestDto;
 };
 
 
@@ -262,6 +269,11 @@ export type Record = {
 
 export type RecordCreateRequestDto = {
   tableId: Scalars['ID']['input'];
+};
+
+export type RecordIndexUpdateRequestDto = {
+  newIndex: Scalars['Int']['input'];
+  recordId: Scalars['ID']['input'];
 };
 
 export type Table = {

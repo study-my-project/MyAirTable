@@ -173,6 +173,16 @@ export const CREATE_RECORD = gql`
     }
 }
 `
+// 레코드 자리 바꾸기
+export const UPDATE_RECORD_INDEX = gql`
+    mutation UpdateRecordIndex($recordId:ID!,$newIndex:Int! ) {
+    updateRecordIndex(
+        recordIndexUpdateRequestDto: { recordId: $recordId, newIndex: $newIndex }
+    )
+}
+
+`
+
 // 레코드 삭제
 export const DELETE_RECORD = gql`
     mutation DeleteRecord ($recordId:ID!){
@@ -249,5 +259,5 @@ mutation UpdateCellValue  ($fieldId:ID!, $recordId:ID!,$value:String! ){
         updatedAt
     }
 }
-
 `
+

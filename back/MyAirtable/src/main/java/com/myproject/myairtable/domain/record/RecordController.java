@@ -1,6 +1,7 @@
 package com.myproject.myairtable.domain.record;
 
 import com.myproject.myairtable.domain.record.dto.RecordCreateRequestDto;
+import com.myproject.myairtable.domain.record.dto.RecordIndexUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -25,6 +26,12 @@ public class RecordController {
     @QueryMapping
     public List<Record> getRecordsByTableId(@Argument Long tableId) {
         return recordService.getRecordsByTableId(tableId);
+    }
+
+    // 레코드의 순서 변경
+    @MutationMapping
+    public Boolean updateRecordIndex(@Argument RecordIndexUpdateRequestDto recordIndexUpdateRequestDto){
+        return recordService.updateRecordIndex(recordIndexUpdateRequestDto);
     }
 
     // Delete (논리 삭제)
