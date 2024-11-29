@@ -47,6 +47,8 @@ type Mutation {
 
     # 필드 생성
     createField(fieldCreateRequestDto: FieldCreateRequestDto!) : Field!
+    # 필드 순서 변경
+    updateFieldIndex(fieldIndexUpdateRequestDto: FieldIndexUpdateRequestDto!) : Boolean!
     # 필드 삭제
     deleteField(fieldId:ID!) : Boolean!
     # 레코드 생성
@@ -64,7 +66,10 @@ input RecordIndexUpdateRequestDto{
     recordId:ID!
     newIndex: Int!
 }
-
+input FieldIndexUpdateRequestDto {
+    fieldId: ID!
+    newIndex: Int!
+}
 input WorkspaceCreateRequestDto {
     # 요청 필드 정의
     workspaceName: String!

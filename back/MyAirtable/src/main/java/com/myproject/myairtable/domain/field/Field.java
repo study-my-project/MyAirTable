@@ -61,4 +61,9 @@ public class Field extends BaseEntity {
         }
     }
 
+
+    public void updateFieldIndex(int newIndex){
+        this.fieldIndex = newIndex;
+    }
+
 }

@@ -11,7 +11,11 @@ public interface FieldRepository extends JpaRepository<Field, Long> {
     @Query("SELECT COUNT(f) FROM Field f WHERE f.tableId = :tableId AND f.deletedAt IS NULL")
     int countByTableId(@Param("tableId") Long tableId);
 
-    @Query("SELECT w FROM Field w WHERE w.tableId = :tableId AND w.deletedAt IS NULL")
-    List<Field> findByTableId(@Param("tableId") Long tableId);
+    @Query("SELECT f FROM Field f WHERE f.tableId = :tableId AND f.deletedAt IS NULL ORDER BY f.fieldIndex ASC")
+    List<Field> findByTableIdOrderByFieldIndex(@Param("tableId") Long tableId);
 
+
+    //특정 테이블의 논리적으로 삭제되지 않은 필드를 인덱스로 조회
+    @Query("SELECT f FROM Field f WHERE f.tableId = :tableId AND f.fieldIndex = :fieldIndex AND f.deletedAt IS NULL")
+    Field findByTableIdAndFieldIndex(@Param("tableId") Long tableId, @Param("fieldIndex") int fieldIndex);
 }

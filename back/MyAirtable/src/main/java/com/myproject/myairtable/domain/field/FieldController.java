@@ -1,6 +1,7 @@
 package com.myproject.myairtable.domain.field;
 
 import com.myproject.myairtable.domain.field.dto.FieldCreateRequestDto;
+import com.myproject.myairtable.domain.field.dto.FieldIndexUpdateRequestDto;
 import com.myproject.myairtable.domain.field.dto.FieldUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -34,6 +35,12 @@ public class FieldController {
     @MutationMapping
     public Field updateField(@Argument FieldUpdateRequestDto fieldUpdateRequestDto ) {
         return fieldService.updateField(fieldUpdateRequestDto);
+    }
+
+    // 필드 순서 변경
+    @MutationMapping
+    public Boolean updateFieldIndex (@Argument FieldIndexUpdateRequestDto fieldIndexUpdateRequestDto) {
+        return fieldService.updateFieldIndex(fieldIndexUpdateRequestDto);
     }
 
     // Delete (논리 삭제)

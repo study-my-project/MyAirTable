@@ -155,6 +155,13 @@ export const CREATE_FIELD = gql`
 }
 `
 
+// 필드 자리 바꾸기
+export const UPDATE_FIELD_INDEX = gql`
+mutation UpdateFieldIndex ($fieldId:ID!,$newIndex:Int! ) {
+    updateFieldIndex(fieldIndexUpdateRequestDto: { fieldId: $fieldId, newIndex: $newIndex })
+}
+`
+
 // 필드 삭제
 export const DELETE_FIELD = gql`
     mutation DeleteField ($fieldId:ID!){

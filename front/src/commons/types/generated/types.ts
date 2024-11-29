@@ -80,6 +80,11 @@ export type FieldCreateRequestDto = {
   type: Scalars['String']['input'];
 };
 
+export type FieldIndexUpdateRequestDto = {
+  fieldId: Scalars['ID']['input'];
+  newIndex: Scalars['Int']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   /**  Base 생성 */
@@ -108,6 +113,8 @@ export type Mutation = {
   updateBase: Base;
   /**  CellValue 수정 */
   updateCellValue: CellValue;
+  /**  필드 순서 변경 */
+  updateFieldIndex: Scalars['Boolean']['output'];
   /**  레코드 순서 변경 */
   updateRecordIndex: Scalars['Boolean']['output'];
   /**  테이블 업데이트 */
@@ -179,6 +186,11 @@ export type MutationUpdateBaseArgs = {
 
 export type MutationUpdateCellValueArgs = {
   cellValueUpdateRequestDto: CellValueUpdateRequestDto;
+};
+
+
+export type MutationUpdateFieldIndexArgs = {
+  fieldIndexUpdateRequestDto: FieldIndexUpdateRequestDto;
 };
 
 

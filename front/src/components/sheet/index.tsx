@@ -8,7 +8,8 @@ import {
     CREATE_RECORD,
     DELETE_FIELD,
     DELETE_RECORD,
-    UPDATE_RECORD_INDEX
+    UPDATE_RECORD_INDEX,
+    UPDATE_FIELD_INDEX
 } from "../../../src/graphql/queries";
 import { useMutation, useQuery } from "@apollo/client";
 import type {
@@ -18,7 +19,7 @@ import type {
 
 } from "../../../src/commons/types/generated/types";
 
-import { DndContext, closestCenter } from "@dnd-kit/core";
+import { DndContext, closestCenter,DragEndEvent  } from "@dnd-kit/core";
 import {
     arrayMove,
     SortableContext,
@@ -88,6 +89,8 @@ export default function Sheet({ tableId }: { tableId: string }) {
                 variables: {
                     tableId,
                     fieldName: `필드 ${fieldCount + 1}`, // 필드 수를 기반으로 새 필드 이름 생성
+                    type: "text",
+                    options: "{}"
                 },
             });
             console.log("Field added:", response);
@@ -113,6 +116,24 @@ export default function Sheet({ tableId }: { tableId: string }) {
         }
     };
 
+    // 필드 자리 변경하기
+    const [fields, setFields] = useState<
+        { id: string; fieldName: string; fieldIndex: number }[]
+    >([]);
+    useEffect(() => {
+        if (tableDetailsData?.getTableDetailsById?.fields) {
+            setFields(
+                [...tableDetailsData.getTableDetailsById.fields].sort(
+                    (a, b) => a.fieldIndex - b.fieldIndex
+                )
+            );
+        }
+    }, [tableDetailsData]);
+
+    const [updateFieldIndex] = useMutation<
+        Pick<Mutation, "updateFieldIndex">
+    >(UPDATE_FIELD_INDEX);
+
     // 레코드 자리 변경하기
     // 레코드 상태 관리
     const [records, setRecords] = useState<
@@ -132,8 +153,48 @@ export default function Sheet({ tableId }: { tableId: string }) {
         Pick<Mutation, "updateRecordIndex">
     >(UPDATE_RECORD_INDEX);
 
+    // 필드 드래그 종료 시 호출되는 핸들러
+    const handleFieldDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (!over || active.id === over.id) {
+            return; // 드롭 대상이 없거나, 같은 위치라면 종료
+        }
+
+        const oldIndex = fields.findIndex((field) => field.id === active.id);
+        const newIndex = fields.findIndex((field) => field.id === over.id);
+
+        // 필드 순서 업데이트
+        const reorderedFields = arrayMove(fields, oldIndex, newIndex).map(
+            (field, index) => ({
+                ...field,
+                fieldIndex: index + 1, // 필드 인덱스를 1부터 시작
+            })
+        );
+
+        // 로컬 상태 업데이트
+        setFields(reorderedFields);
+
+        try {
+            // 백엔드에 순서 변경 요청
+            await updateFieldIndex({
+                variables: {
+                    fieldId: active.id,
+                    newIndex: newIndex + 1,
+                },
+            });
+
+            // 데이터 다시 가져오기
+            await refetch();
+            console.log("Field index updated successfully");
+        } catch (error) {
+            console.error("Error updating field index:", error);
+            refetch(); // 실패 시 데이터 복구
+        }
+    };
+
     // 드래그 종료 시 호출되는 핸들러
-    const handleDragEnd = async (event: any) => {
+    const handleRecordDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
 
         if (!over || active.id === over.id) {
@@ -298,25 +359,34 @@ export default function Sheet({ tableId }: { tableId: string }) {
         <>
             <styles.excel_container>
                 <styles.excel_table>
-                    <thead>
-                        <tr>
-                            <styles.excel_table_th></styles.excel_table_th>
-                            {tableDetailsData?.getTableDetailsById.fields.map((field) => (
-                                <styles.excel_table_th key={field.id}
-                                    onContextMenu={(e) =>
-                                        handleContextMenu(e, "field", field.id)
-                                    }>
-                                    {field.fieldName}
-                                </styles.excel_table_th>
-                            ))}
-                            <styles.excel_table_th>
-                                <styles.create_button onClick={handleCreateRecord}>
-                                    + 레코드
-                                </styles.create_button>
-                            </styles.excel_table_th>
-                        </tr>
-                    </thead>
-                    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <DndContext
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleFieldDragEnd} // 필드 드래그 이벤트 처리
+                    >
+                        <SortableContext
+                            items={fields.map((field) => field.id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            <thead>
+                                <tr>
+                                    <styles.excel_table_th></styles.excel_table_th>
+                                    {fields.map((field) => (
+                                        <SortableField
+                                            key={field.id}
+                                            field={field}
+                                            handleContextMenu={handleContextMenu}
+                                        />
+                                    ))}
+                                    <styles.excel_table_th>
+                                        <styles.create_button onClick={handleCreateField}>
+                                            + 필드
+                                        </styles.create_button>
+                                    </styles.excel_table_th>
+                                </tr>
+                            </thead>
+                        </SortableContext>
+                    </DndContext>
+                    <DndContext collisionDetection={closestCenter} onDragEnd={handleRecordDragEnd}>
                         <SortableContext
                             items={records.map((record) => record.id)}
                             strategy={verticalListSortingStrategy}
@@ -430,5 +500,33 @@ function SortableRow({
                 );
             })}
         </tr>
+    );
+}
+
+function SortableField({
+    field,
+    handleContextMenu,
+}: {
+    field: { id: string; fieldName: string; fieldIndex: number };
+    handleContextMenu: (event: React.MouseEvent<HTMLTableCellElement>, type: "field" | "record", id: string) => void;
+}) {
+    const { attributes, listeners, setNodeRef, transform, transition } =
+        useSortable({ id: field.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    return (
+        <styles.excel_table_th
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            onContextMenu={(e) => handleContextMenu(e, "field", field.id)}
+        >
+            {field.fieldName}
+        </styles.excel_table_th>
     );
 }

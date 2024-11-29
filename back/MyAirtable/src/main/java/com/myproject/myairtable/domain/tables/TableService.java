@@ -38,7 +38,7 @@ public class TableService {
     // Read - 특정 테이블 읽기
     public TableDetailsResponseDto getTableDetailsById(Long tableId) {
         // 테이블에 속한 필드들 가져오기
-        List<Field> fieldsList = fieldRepository.findByTableId(tableId);
+        List<Field> fieldsList = fieldRepository.findByTableIdOrderByFieldIndex(tableId);
         Field[] fields = fieldsList.toArray(new Field[0]);
 
         // 테이블에 속한 레코드들 가져오기
