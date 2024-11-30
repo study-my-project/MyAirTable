@@ -26,16 +26,23 @@ public class Table extends BaseEntity {
     @Column(name = "table_name", nullable = false)
     private String tableName;
 
-    public Table (TableCreateRequestDto tableCreateRequestDto) {
+    @Column(name = "table_index", nullable = false)
+    private int tableIndex;
+
+    public Table (TableCreateRequestDto tableCreateRequestDto, int tableIndex) {
         this.baseId = tableCreateRequestDto.getBaseId();
         this.tableName = tableCreateRequestDto.getTableName();
+        this.tableIndex = tableIndex;
     }
 
     public void updateTable (TableUpdateRequestDto tableUpdateRequestDto) {
         if(tableUpdateRequestDto.getTableName() != null){
             this.tableName = tableUpdateRequestDto.getTableName();
         }
+    }
 
+    public void updateTableIndex(int newIndex) {
+        this.tableIndex = newIndex;
     }
 
 }

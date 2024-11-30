@@ -119,6 +119,8 @@ export type Mutation = {
   updateRecordIndex: Scalars['Boolean']['output'];
   /**  테이블 업데이트 */
   updateTable: Table;
+  /**  테이블 순서 변경 */
+  updateTableIndex: Scalars['Boolean']['output'];
   /**  Workspace 업데이트 */
   updateWorkspace: Workspace;
 };
@@ -201,6 +203,11 @@ export type MutationUpdateRecordIndexArgs = {
 
 export type MutationUpdateTableArgs = {
   tableUpdateRequestDto: TableUpdateRequestDto;
+};
+
+
+export type MutationUpdateTableIndexArgs = {
+  tableIndexUpdateRequestDto: TableIndexUpdateRequestDto;
 };
 
 
@@ -307,6 +314,11 @@ export type TableDetailsResponseDto = {
   cellValues: Array<CellValue>;
   fields: Array<Field>;
   records: Array<Record>;
+};
+
+export type TableIndexUpdateRequestDto = {
+  newIndex: Scalars['Int']['input'];
+  tableId: Scalars['ID']['input'];
 };
 
 export type TableUpdateRequestDto = {

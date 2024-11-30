@@ -118,7 +118,7 @@ export const CREATE_TABLE = gql`
 
 `
 
-// // 테이블 수정
+// 테이블 수정
 export const UPDATE_TABLE = gql`
     mutation UpdateTable ($id: ID! , $tableName: String!) {
     updateTable(tableUpdateRequestDto: { id: $id, tableName: $tableName }) {
@@ -131,7 +131,17 @@ export const UPDATE_TABLE = gql`
 }
 
 `
-// // 테이블 삭제
+
+// 테이블 위치 수정하기
+export const UPDATE_INDEX_TABLE = gql`
+    mutation UpdateTableIndex ($tableId:ID!,$newIndex:Int! ){
+    updateTableIndex(tableIndexUpdateRequestDto: { tableId: $tableId, newIndex: $newIndex })
+}
+
+`
+
+
+// 테이블 삭제
 export const DELETE_TABLE = gql`
     mutation DeleteTable($tableId:ID!) {
     deleteTable(tableId: $tableId)

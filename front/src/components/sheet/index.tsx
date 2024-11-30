@@ -359,6 +359,8 @@ export default function Sheet({ tableId }: { tableId: string }) {
         <>
             <styles.excel_container>
                 <styles.excel_table>
+
+                    
                     <DndContext
                         collisionDetection={closestCenter}
                         onDragEnd={handleFieldDragEnd} // 필드 드래그 이벤트 처리

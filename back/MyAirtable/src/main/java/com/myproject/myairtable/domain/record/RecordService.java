@@ -17,7 +17,7 @@ public class RecordService {
     // Create
     public Record createRecord(RecordCreateRequestDto recordCreateRequestDto) {
         synchronized (this) {
-            int currentRecordCount = recordRepository.countByTableID(recordCreateRequestDto.getTableId());
+            int currentRecordCount = recordRepository.countByTableId(recordCreateRequestDto.getTableId());
             int newRecordCount = currentRecordCount + 1;
             Record record = new Record(recordCreateRequestDto, newRecordCount);
             return recordRepository.save(record);

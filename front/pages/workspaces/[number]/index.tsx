@@ -1,15 +1,18 @@
 import { useRouter } from "next/router";
 import { useQuery, useMutation } from "@apollo/client";
-import { GET_BASE_TABLES, CREATE_TABLE, UPDATE_TABLE, DELETE_TABLE, CREATE_FIELD, CREATE_RECORD } from "../../../src/graphql/queries";
+import { GET_BASE_TABLES, CREATE_TABLE, UPDATE_TABLE, DELETE_TABLE, CREATE_FIELD, CREATE_RECORD, UPDATE_INDEX_TABLE } from "../../../src/graphql/queries";
 import type {
     QueryGetTablesByBaseIdArgs,
     Query,
     Mutation
 } from "../../../src/commons/types/generated/types";
 import * as styles from "./tablePage.style";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import Sheet from "../../../src/components/sheet"
-
+import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
+import { SortableContext, horizontalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { useSortable } from "@dnd-kit/sortable";
 // 모달 타입 정의
 type ModalType = "create_table" | "edit_table" | "delete_table";
 
@@ -24,18 +27,34 @@ export default function TablePage() {
     const baseId = Array.isArray(number) ? number[0] : number;
 
     //baseId 가지고 table들 리스트로 가져오기
-    const { data } = useQuery<Pick<Query, "getTablesByBaseId">, QueryGetTablesByBaseIdArgs>(GET_BASE_TABLES, {
+    const { data, refetch } = useQuery<Pick<Query, "getTablesByBaseId">, QueryGetTablesByBaseIdArgs>(GET_BASE_TABLES, {
         variables: baseId ? { baseId } : undefined,
         skip: !baseId,
     });
 
-    // 받아온 테이블 리스트를 tables 변수에 저장
-    const tables = data?.getTablesByBaseId || [];
+    // 테이블 데이터를 가져오기
+    const tables = useMemo(() => {
+        return data?.getTablesByBaseId || [];
+    }, [data]);
+
+    // 테이블 상태를 설정
+    useEffect(() => {
+        setOrderedTables(tables.map((table, index) => ({ ...table, index })));
+    }, [tables]);
+
+
+    const [orderedTables, setOrderedTables] = useState<{ id: string; tableName: string; index: number }[]>([]);
+
+    useEffect(() => {
+        setOrderedTables(tables.map((table, index) => ({ ...table, index })));
+    }, [tables]);
 
     // 테이블을 만들때 이름을 저장할 곳
     const [newTableName, setNewTableName] = useState("");
     // 수정할 선택한 테이블
     const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+
+
     // 테이블을 생성할 뮤테이션
     const [createTable] = useMutation<Pick<Mutation, "createTable">>(
         CREATE_TABLE,
@@ -70,6 +89,10 @@ export default function TablePage() {
         refetchQueries: [{ query: GET_BASE_TABLES, variables: { baseId } }],
     });
 
+    // 테이블 인덱스 수정 뮤테이션
+    const [updateTableIndex] = useMutation(UPDATE_INDEX_TABLE, {
+        refetchQueries: [{ query: GET_BASE_TABLES, variables: { baseId } }],
+    });
     // 
     // 모달의 타입 
     const [modalType, setModalType] = useState<ModalType>("create_table");
@@ -260,32 +283,61 @@ export default function TablePage() {
             scrollContainerRef.current.scrollBy({ left: 100, behavior: "smooth" });
         }
     };
+
+
+    const handleTableDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (!over || !over.id || active.id === over.id) return;
+
+        const oldIndex = orderedTables.findIndex((table) => table.id === active.id);
+        const newIndex = orderedTables.findIndex((table) => table.id === over.id);
+
+        const reorderedTables = arrayMove(orderedTables, oldIndex, newIndex).map((table, index) => ({
+            ...table,
+            index,
+        }));
+        setOrderedTables(reorderedTables);
+
+        try {
+            await updateTableIndex({ variables: { tableId: active.id, newIndex } });
+            refetch();
+        } catch (error) {
+            console.error("테이블 순서 업데이트 중 오류:", error);
+            refetch();
+        }
+    };
+
     return (
         <styles.Container>
             {/* 탭 목록 */}
             <styles.TabHeader>
 
-                    <styles.AddTabButton onClick={() => openModal({ type: "create_table" })}>
-                        +
-                    </styles.AddTabButton>
+                <styles.AddTabButton onClick={() => openModal({ type: "create_table" })}>
+                    +
+                </styles.AddTabButton>
 
-                <styles.Tabs ref={scrollContainerRef}>
-                    {/* tables의 데이터 수만큼 반복 */}
-                    {tables.map((table) => (
-                        <styles.Tab
-                            key={table.id}
-                            // isActive = 활성화 여부 boolean 값
-                            //  table.id 와 activeTab 값이 같으면 true 반환
-                            isActive={table.id === activeTab}
-                            // 탭을 클릭하면 발생할 이벤트
-                            onClick={() => handleTabClick(table.id)}
-                            onContextMenu={(e) => handleContextMenu(e, table.id)} // 우클릭 이벤트
-                        >
-                            {table.tableName}
-                        </styles.Tab>
-                    ))}
-                
-                </styles.Tabs>
+                <DndContext
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleTableDragEnd} // 드래그 종료 시 호출
+                >
+                    <SortableContext
+                        items={orderedTables.map((table) => table.id)}
+                        strategy={horizontalListSortingStrategy} // 수평 정렬 전략
+                    >
+                        <styles.Tabs ref={scrollContainerRef}>
+                            {orderedTables.map((table) => (
+                                <SortableTab
+                                    key={table.id}
+                                    table={table}
+                                    isActive={table.id === activeTab}
+                                    onClick={() => handleTabClick(table.id)}
+                                    onContextMenu={(e) => handleContextMenu(e, table.id)}
+                                />
+                            ))}
+                        </styles.Tabs>
+                    </SortableContext>
+                </DndContext>
                 <styles.ScrollLeftButton onClick={scrollLeft}>{"<"}</styles.ScrollLeftButton>
 
                 <styles.ScrollRightButton onClick={scrollRight}>{">"}</styles.ScrollRightButton>
@@ -301,79 +353,128 @@ export default function TablePage() {
             </styles.Content>
             {/* 모달 내용 */}
 
-            {isModalOpen && modalType === "create_table" && (
-                <styles.Modal>
-                    <styles.ModalContent>
-                        <h2>새로운 테이블 생성</h2>
-                        <styles.Input
-                            type="text"
-                            placeholder="테이블 이름을 입력하세요"
-                            value={newTableName}
-                            onChange={(e) => setNewTableName(e.target.value)}
-                        />
-                        <styles.ButtonContainer>
-                            <styles.Button onClick={handleCreateTable}>생성</styles.Button>
-                            <styles.Button onClick={closeModal}>취소</styles.Button>
-                        </styles.ButtonContainer>
-                    </styles.ModalContent>
-                </styles.Modal>
-            )}
-            {isModalOpen && modalType === "edit_table" && (
-                <styles.Modal>
-                    <styles.ModalContent>
-                        <h2>테이블 이름 수정</h2>
-                        <styles.Input
-                            type="text"
-                            placeholder="새로운 테이블 이름을 입력하세요"
-                            value={newTableName}
-                            onChange={(e) => setNewTableName(e.target.value)}
-                        />
-                        <styles.ButtonContainer>
-                            <styles.Button onClick={handleEditTable}>수정</styles.Button>
-                            <styles.Button onClick={closeModal}>취소</styles.Button>
-                        </styles.ButtonContainer>
-                    </styles.ModalContent>
-                </styles.Modal>
-            )}
+            {
+                isModalOpen && modalType === "create_table" && (
+                    <styles.Modal>
+                        <styles.ModalContent>
+                            <h2>새로운 테이블 생성</h2>
+                            <styles.Input
+                                type="text"
+                                placeholder="테이블 이름을 입력하세요"
+                                value={newTableName}
+                                onChange={(e) => setNewTableName(e.target.value)}
+                            />
+                            <styles.ButtonContainer>
+                                <styles.Button onClick={handleCreateTable}>생성</styles.Button>
+                                <styles.Button onClick={closeModal}>취소</styles.Button>
+                            </styles.ButtonContainer>
+                        </styles.ModalContent>
+                    </styles.Modal>
+                )
+            }
+            {
+                isModalOpen && modalType === "edit_table" && (
+                    <styles.Modal>
+                        <styles.ModalContent>
+                            <h2>테이블 이름 수정</h2>
+                            <styles.Input
+                                type="text"
+                                placeholder="새로운 테이블 이름을 입력하세요"
+                                value={newTableName}
+                                onChange={(e) => setNewTableName(e.target.value)}
+                            />
+                            <styles.ButtonContainer>
+                                <styles.Button onClick={handleEditTable}>수정</styles.Button>
+                                <styles.Button onClick={closeModal}>취소</styles.Button>
+                            </styles.ButtonContainer>
+                        </styles.ModalContent>
+                    </styles.Modal>
+                )
+            }
 
-            {isModalOpen && modalType === "delete_table" && (
-                <styles.Modal>
-                    <styles.ModalContent>
-                        <h2>정말로 삭제하시겠습니까?</h2>
-                        <p>{`[${tables.find((t) => t.id === selectedTableId)?.tableName}] 테이블을 삭제합니다.`}</p>
-                        <styles.ButtonContainer>
-                            <styles.Button onClick={handleDeleteTable}>삭제</styles.Button>
-                            <styles.Button onClick={closeModal}>취소</styles.Button>
-                        </styles.ButtonContainer>
-                    </styles.ModalContent>
-                </styles.Modal>
-            )}
+            {
+                isModalOpen && modalType === "delete_table" && (
+                    <styles.Modal>
+                        <styles.ModalContent>
+                            <h2>정말로 삭제하시겠습니까?</h2>
+                            <p>{`[${tables.find((t) => t.id === selectedTableId)?.tableName}] 테이블을 삭제합니다.`}</p>
+                            <styles.ButtonContainer>
+                                <styles.Button onClick={handleDeleteTable}>삭제</styles.Button>
+                                <styles.Button onClick={closeModal}>취소</styles.Button>
+                            </styles.ButtonContainer>
+                        </styles.ModalContent>
+                    </styles.Modal>
+                )
+            }
 
             {/* 컨텍스트 메뉴 */}
-            {contextMenu && (
-                <styles.ContextMenu style={{ top: contextMenu.y, left: contextMenu.x }}>
-                    {/* 수정 클릭 시 수정 모달 열기 */}
-                    <styles.ContextMenuItem
-                        onClick={() => {
-                            openModal({ type: "edit_table", tableId: contextMenu.tableId });
-                            handleCloseContextMenu();
-                        }}
-                    >
-                        수정
-                    </styles.ContextMenuItem>
+            {
+                contextMenu && (
+                    <styles.ContextMenu style={{ top: contextMenu.y, left: contextMenu.x }}>
+                        {/* 수정 클릭 시 수정 모달 열기 */}
+                        <styles.ContextMenuItem
+                            onClick={() => {
+                                openModal({ type: "edit_table", tableId: contextMenu.tableId });
+                                handleCloseContextMenu();
+                            }}
+                        >
+                            수정
+                        </styles.ContextMenuItem>
 
-                    {/* 삭제 클릭 시 삭제 모달 열기 */}
-                    <styles.ContextMenuItem
-                        onClick={() => {
-                            openModal({ type: "delete_table", tableId: contextMenu.tableId });
-                            handleCloseContextMenu();
-                        }}
-                    >
-                        삭제
-                    </styles.ContextMenuItem>
-                </styles.ContextMenu>
-            )}
-        </styles.Container>
+                        {/* 삭제 클릭 시 삭제 모달 열기 */}
+                        <styles.ContextMenuItem
+                            onClick={() => {
+                                openModal({ type: "delete_table", tableId: contextMenu.tableId });
+                                handleCloseContextMenu();
+                            }}
+                        >
+                            삭제
+                        </styles.ContextMenuItem>
+                    </styles.ContextMenu>
+                )
+            }
+        </styles.Container >
 
     )
+}
+function SortableTab({
+    table,
+    isActive,
+    onClick,
+    onContextMenu,
+}: {
+    table: { id: string; tableName: string; index: number };
+    isActive: boolean;
+    onClick: () => void;
+    onContextMenu: (e: React.MouseEvent, tableId: string) => void;
+}) {
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+        id: table.id,
+    });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+    // 드래그 중인지 감지하기 위한 로컬 상태
+    const [isDragging, setIsDragging] = useState(false);
+
+    return (
+        <styles.Tab
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            isActive={isActive}
+            onPointerDown={() => setIsDragging(false)} // 클릭 시작 시 드래그 상태 초기화
+            onPointerMove={() => setIsDragging(true)} // 포인터 이동 시 드래그 상태로 설정
+            onPointerUp={() => {
+                if (!isDragging) onClick(); // 드래그 상태가 아니면 클릭 처리
+            }}
+            onContextMenu={(e) => onContextMenu(e, table.id)}
+        >
+            {table.tableName}
+        </styles.Tab>
+    );
 }

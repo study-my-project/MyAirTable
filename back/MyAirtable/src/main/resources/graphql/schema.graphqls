@@ -42,6 +42,8 @@ type Mutation {
     createTable(tableCreateRequestDto: TableCreateRequestDto!) : Table!
     # 테이블 업데이트
     updateTable (tableUpdateRequestDto: TableUpdateRequestDto!) : Table!
+    # 테이블 순서 변경
+    updateTableIndex (tableIndexUpdateRequestDto: TableIndexUpdateRequestDto!) : Boolean!
     # 테이블 삭제
     deleteTable (tableId: ID!) : Boolean!
 
@@ -61,6 +63,11 @@ type Mutation {
     createCellValue(cellValueCreateRequestDto: CellValueCreateRequestDto!) : CellValue!
     # CellValue 수정
     updateCellValue(cellValueUpdateRequestDto: CellValueUpdateRequestDto!) : CellValue!
+}
+
+input TableIndexUpdateRequestDto {
+    tableId : ID!
+    newIndex : Int!
 }
 input RecordIndexUpdateRequestDto{
     recordId:ID!
@@ -149,6 +156,7 @@ type Table{
     id: ID!
     baseId: ID!
     tableName: String!
+    tableIndex: Int!
     createdAt: String
     updatedAt: String
 }

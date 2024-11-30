@@ -3,6 +3,7 @@ package com.myproject.myairtable.domain.tables;
 
 import com.myproject.myairtable.domain.tables.dto.TableCreateRequestDto;
 import com.myproject.myairtable.domain.tables.dto.TableDetailsResponseDto;
+import com.myproject.myairtable.domain.tables.dto.TableIndexUpdateRequestDto;
 import com.myproject.myairtable.domain.tables.dto.TableUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -42,6 +43,12 @@ public class TableController {
     @MutationMapping
     public Table updateTable(@Argument TableUpdateRequestDto tableUpdateRequestDto) {
         return tableService.updateTable(tableUpdateRequestDto);
+    }
+
+    // IndexUpdate
+    @MutationMapping
+    public Boolean updateTableIndex(@Argument TableIndexUpdateRequestDto tableIndexUpdateRequestDto) {
+        return tableService.updateTableIndex(tableIndexUpdateRequestDto);
     }
 
     // Delete (논리 삭제)
