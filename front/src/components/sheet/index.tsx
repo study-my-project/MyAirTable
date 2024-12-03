@@ -19,7 +19,7 @@ import type {
 
 } from "../../../src/commons/types/generated/types";
 
-import { DndContext, closestCenter,DragEndEvent  } from "@dnd-kit/core";
+import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
     arrayMove,
     SortableContext,
@@ -51,12 +51,48 @@ export default function Sheet({ tableId }: { tableId: string }) {
     const [cellValues, setCellValues] = useState<
         { fieldId: string; recordId: string; value: string }[]
     >([]);
+    const [columnWidths, setColumnWidths] = useState<number[]>([]); // 열 너비 상태 관리
     useEffect(() => {
         if (tableDetailsData?.getTableDetailsById) {
             setCellValues(tableDetailsData.getTableDetailsById.cellValues || []);
+            setColumnWidths(
+                tableDetailsData.getTableDetailsById.fields.map(() => 100)
+            ); // 초기 너비 설정
         }
     }, [tableDetailsData]);
 
+    const handleResizeMouseDown = (index: number, e: React.MouseEvent) => {
+        e.preventDefault();
+        const startX = e.clientX;
+        const startWidth = columnWidths[index];
+
+        const handleMouseMove = (moveEvent: MouseEvent) => {
+            const deltaX = moveEvent.clientX - startX;
+            setColumnWidths((prevWidths) => {
+                const newWidths = [...prevWidths];
+                newWidths[index] = Math.max(50, startWidth + deltaX); // 최소 너비 50px
+                return newWidths;
+            });
+        };
+
+        const handleMouseUp = () => {
+            document.removeEventListener("mousemove", handleMouseMove);
+            document.removeEventListener("mouseup", handleMouseUp);
+        };
+
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+    };
+
+    useEffect(() => {
+        if (tableDetailsData?.getTableDetailsById?.fields) {
+            setFields(
+                [...tableDetailsData.getTableDetailsById.fields].sort(
+                    (a, b) => a.fieldIndex - b.fieldIndex
+                )
+            );
+        }
+    }, [tableDetailsData]);
     // 뮤테이션으로 값을 입력하기
     const [createCellValue] = useMutation<Pick<Mutation, "createCellValue">>(CREATE_CELL_VALUE, {
         refetchQueries: [{ query: GET_TABLE_DETAILS }],
@@ -357,10 +393,11 @@ export default function Sheet({ tableId }: { tableId: string }) {
     };
     return (
         <>
+         <styles.excel_table_wrapper>
             <styles.excel_container>
                 <styles.excel_table>
 
-                    
+
                     <DndContext
                         collisionDetection={closestCenter}
                         onDragEnd={handleFieldDragEnd} // 필드 드래그 이벤트 처리
@@ -372,11 +409,13 @@ export default function Sheet({ tableId }: { tableId: string }) {
                             <thead>
                                 <tr>
                                     <styles.excel_table_th></styles.excel_table_th>
-                                    {fields.map((field) => (
+                                    {fields.map((field, index) => (
                                         <SortableField
                                             key={field.id}
                                             field={field}
                                             handleContextMenu={handleContextMenu}
+                                            width={columnWidths[index]}
+                                            onResize={(e) => handleResizeMouseDown(index, e)}
                                         />
                                     ))}
                                     <styles.excel_table_th>
@@ -419,6 +458,7 @@ export default function Sheet({ tableId }: { tableId: string }) {
                     </DndContext>
                 </styles.excel_table>
             </styles.excel_container>
+            </styles.excel_table_wrapper>
 
             {/* 컨텍스트 메뉴 */}
             {
@@ -508,16 +548,24 @@ function SortableRow({
 function SortableField({
     field,
     handleContextMenu,
+    width,
+    onResize,
 }: {
     field: { id: string; fieldName: string; fieldIndex: number };
     handleContextMenu: (event: React.MouseEvent<HTMLTableCellElement>, type: "field" | "record", id: string) => void;
+    width: number;
+    onResize: (e: React.MouseEvent<HTMLDivElement>) => void;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({ id: field.id });
 
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
+    const style: React.CSSProperties = {
+        transform: transform ? CSS.Transform.toString(transform) : undefined,
+        transition: transition || undefined,
+        width: `${width}px`,
+        position: "relative",
+        overflow: "hidden",
+        whiteSpace: "nowrap"
     };
 
     return (
@@ -529,6 +577,7 @@ function SortableField({
             onContextMenu={(e) => handleContextMenu(e, "field", field.id)}
         >
             {field.fieldName}
+            <styles.ResizeHandle onMouseDown={onResize} />
         </styles.excel_table_th>
     );
 }
