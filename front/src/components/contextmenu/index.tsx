@@ -1,6 +1,14 @@
-import { useState,useEffect, useRef,useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import * as styles from "./contextmenu.style";
 import ReactDOM from "react-dom";
+import {
+    DELETE_FIELD,
+    DELETE_RECORD,
+    GET_TABLE_DETAILS,
+} from "../../../src/graphql/queries";
+import { useMutation } from "@apollo/client"; import type {
+    Mutation
+} from "../../../src/commons/types/generated/types";
 
 
 type ContextMenuState = {
@@ -10,7 +18,7 @@ type ContextMenuState = {
     id: string | null; // 클릭한 요소의 id
 } | null;
 
-export const useContextMenu = () => {
+export const useContextMenu = (tableId: string) => {
     // 컨텍스트 메뉴 상태
     const [contextMenu, setContextMenu] = useState<ContextMenuState>(null);
 
@@ -20,6 +28,7 @@ export const useContextMenu = () => {
         type: "field" | "record",
         id: string
     ) => {
+        isContextMenuOpen.current = true;
         e.preventDefault();
         setContextMenu({
             x: e.clientX,
@@ -31,11 +40,14 @@ export const useContextMenu = () => {
 
     // 컨텍스트 메뉴 닫기
     // useCallback : 함수를 메모제이션해서 불필요한 재생성 방지
-
+    const isContextMenuOpen = useRef(false);
     const closeContextMenu = useCallback(() => {
         // 컨텍스트 메뉴의 값을 null로 만들어서 메뉴 종료
-        setContextMenu(null);
-    },[setContextMenu]); // 의존성배열 : 함수가 다시 생성될지 여부를 결정하는 값들의 배열, 배열의 값이 변경될 떄만 함수가 새로 생성됨
+        if (isContextMenuOpen.current) {
+            setContextMenu(null);
+            isContextMenuOpen.current = false; // 상태를 업데이트
+        }
+    }, []); // 의존성배열 : 함수가 다시 생성될지 여부를 결정하는 값들의 배열, 배열의 값이 변경될 떄만 함수가 새로 생성됨
     // 해당 내용을 useCallback으로 만들지 않으면 아래의 menuRef로 인해서 재생성될 가능성이 있음.
 
 
@@ -45,9 +57,20 @@ export const useContextMenu = () => {
     // const ref = useRef(initialValue);  <- 기본 문법 / initialValue: 기본값 보통은 null 로 하는게 일반적
     // 리턴값으로 참조 객체: { current: initialValue } 형식의 객체를 반환
     const menuRef = useRef<HTMLDivElement | null>(null);
-    // 메뉴 외부를 클릭하면 컨텍스트 메뉴 닫기
-    // 메뉴 외부 클릭 감지
+
+
+
+
+    // 클릭 이벤트 리스너 추가
+    // 사용자가 메뉴 외부를 클릭했는지 감지하기 위해서 필요함.
+    // React 컴포넌트는 자신의 영역 내부만 감지 가능 하기에 전역 이벤트 리스너인 document를 사용함.
+    // 이미 리스너가 등록된 경우 제거 후 다시 등록
+    const isListenerAdded = useRef(false);
     useEffect(() => {
+
+
+        // 메뉴 외부를 클릭하면 컨텍스트 메뉴 닫기
+        // 메뉴 외부 클릭 감지
         const handleClickOutside = (event: MouseEvent) => {
             // 메뉴 내부를 클릭한 경우 이벤트 무시
             // menuRef.current : menuRef는 useRef로 생성된 객체
@@ -61,19 +84,63 @@ export const useContextMenu = () => {
                 return;
             }
             // 만약 위의 조건을 만족하지 않으면 컨텍스트 메뉴를 닫음.
-            closeContextMenu();
+            if (isContextMenuOpen.current) {
+                closeContextMenu();
+            }
         };
-
-        // 클릭 이벤트 리스너 추가
-        // 사용자가 메뉴 외부를 클릭했는지 감지하기 위해서 필요함.
-        // React 컴포넌트는 자신의 영역 내부만 감지 가능 하기에 전역 이벤트 리스너인 document를 사용함.
-        document.addEventListener("mousedown", handleClickOutside);
-
+        if (contextMenu && !isListenerAdded.current) {
+            document.addEventListener("mousedown", handleClickOutside);
+            isListenerAdded.current = true;
+        }
         return () => {
-            // 클릭 이벤트 리스너 제거
-            document.removeEventListener("mousedown", handleClickOutside);
+            // 메뉴가 닫힐 때 리스너 제거
+            if (isListenerAdded.current) {
+                document.removeEventListener("mousedown", handleClickOutside);
+                isListenerAdded.current = false;
+            }
         };
-    }, [closeContextMenu]);
+    }, [contextMenu, closeContextMenu]);
+
+
+
+    // 데이터 삭제하기
+    const [deleteField] = useMutation<Pick<Mutation, "deleteField">>(DELETE_FIELD, {
+        refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
+    })
+    const [deleteRecord] = useMutation<Pick<Mutation, "deleteRecord">>(DELETE_RECORD, {
+        refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
+    })
+
+
+
+    // 필드 삭제
+    const handleDeleteField = async () => {
+        if (contextMenu?.type === "field" && contextMenu.id) {
+            try {
+                await deleteField({ variables: { fieldId: contextMenu.id } });
+                closeContextMenu();
+            } catch (error) {
+                console.error("Error deleting field:", error);
+            }
+        }
+    };
+
+    // 레코드 삭제
+    const handleDeleteRecord = async () => {
+        if (contextMenu?.type === "record" && contextMenu.id) {
+            try {
+                await deleteRecord({ variables: { recordId: contextMenu.id } });
+                closeContextMenu();
+            } catch (error) {
+                console.error("Error deleting record:", error);
+            }
+        }
+    };
+
+
+
+
+
 
     // 컨텍스트 메뉴 렌더링 컴포넌트
     const renderContextMenu = () => {
@@ -84,6 +151,7 @@ export const useContextMenu = () => {
             contextMenu &&
             ReactDOM.createPortal(
                 <styles.ContextMenu
+                    ref={menuRef} // menuRef를 추가
                     style={{
                         top: `${contextMenu.y}px`,
                         left: `${contextMenu.x}px`,
@@ -92,16 +160,15 @@ export const useContextMenu = () => {
                     {/* 필드 삭제 메뉴 */}
                     {contextMenu.type === "field" && (
                         <styles.ContextMenuItem
-                            onClick={() => console.log("필드 삭제", contextMenu.id)}
+                            onClick={handleDeleteField}
                         >
                             필드 삭제
                         </styles.ContextMenuItem>
                     )}
-
                     {/* 레코드 삭제 메뉴 */}
                     {contextMenu.type === "record" && (
                         <styles.ContextMenuItem
-                            onClick={() => console.log("레코드 삭제", contextMenu.id)}
+                            onClick={handleDeleteRecord}
                         >
                             레코드 삭제
                         </styles.ContextMenuItem>

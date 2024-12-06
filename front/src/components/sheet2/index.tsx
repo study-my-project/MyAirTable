@@ -11,8 +11,6 @@ import {
     UPDATE_CELL_VALUE,
     CREATE_FIELD,
     CREATE_RECORD,
-    DELETE_FIELD,
-    DELETE_RECORD,
     UPDATE_RECORD_INDEX,
     UPDATE_FIELD_INDEX
 } from "../../../src/graphql/queries";
@@ -32,13 +30,6 @@ import SheetRecord from "../sheet_record";
 export default function Sheet({ tableId }: { tableId: string }) {
 
     // 사용하는 뮤테이션, 쿼리들
-    const [createCellValue] = useMutation<Pick<Mutation, "createCellValue">>(CREATE_CELL_VALUE, {
-        refetchQueries: [{ query: GET_TABLE_DETAILS }],
-    });
-
-    const [updateCellValue] = useMutation<Pick<Mutation, "updateCellValue">>(UPDATE_CELL_VALUE, {
-        refetchQueries: [{ query: GET_TABLE_DETAILS }],
-    });
     const [createField] = useMutation<Pick<Mutation, "createField">>(CREATE_FIELD, {
         refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
     });
@@ -46,13 +37,6 @@ export default function Sheet({ tableId }: { tableId: string }) {
     const [createRecord] = useMutation<Pick<Mutation, "createRecord">>(CREATE_RECORD, {
         refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
     });
-
-    const [deleteField] = useMutation<Pick<Mutation, "deleteField">>(DELETE_FIELD, {
-        refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
-    })
-    const [deleteRecord] = useMutation<Pick<Mutation, "deleteRecord">>(DELETE_RECORD, {
-        refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
-    })
     // ----------------------------------
 
 
@@ -89,10 +73,10 @@ export default function Sheet({ tableId }: { tableId: string }) {
     // 필드, 레코드, CellValue를 각각 저장하기위해 useState 만들어주기 
     // 받아오는 데이터는 리스트 형태임
     const [fields, setFields] = useState<
-        { id: string; fieldName: string; fieldIndex: number }[]
+        { id: string; fieldName: string; fieldIndex: number; tableId:string; }[]
     >([]);
     const [records, setRecords] = useState<
-        { id: string; recordIndex: number }[]
+        { id: string; recordIndex: number; tableId:string; }[]
     >([]);
     const [cellValues, setCellValues] = useState<
         { fieldId: string; recordId: string; value: string }[]
@@ -129,33 +113,6 @@ export default function Sheet({ tableId }: { tableId: string }) {
             console.error("레코드 생성에 실패함 :", error);
         }
     };
-
-    // // 필드 삭제
-    // const handleDeleteField = async () => {
-    //     // 컨텍스트 메뉴가 필드에서 열렸고 id값이 있으면 동작
-    //     if (contextMenu?.type === "field" && contextMenu.id) {
-    //         try {
-    //             await deleteField({ variables: { fieldId: contextMenu.id } });
-    //             // 동작후 컨텍스트 메뉴 닫기
-    //             closeContextMenu();
-    //         } catch (error) {
-    //             console.error("Error deleting field:", error);
-    //         }
-    //     }
-    // };
-
-    // // 레코드 삭제
-    // const handleDeleteRecord = async () => {
-    //     if (contextMenu?.type === "record" && contextMenu.id) {
-    //         try {
-    //             await deleteRecord({ variables: { recordId: contextMenu.id } });
-    //             closeContextMenu();
-    //         } catch (error) {
-    //             console.error("Error deleting record:", error);
-    //         }
-    //     }
-    // };
-
 
 
 
@@ -240,7 +197,7 @@ export default function Sheet({ tableId }: { tableId: string }) {
                                     key={record.id}
                                     record={record}
                                     cellValues={cellValues}
-                                    fields={tableDetailsData?.getTableDetailsById.fields || []}
+                                    fields={fields || []}
                                 />
                             ))}
                             {/* 레코드 추가 버튼 */}

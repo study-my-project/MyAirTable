@@ -8,11 +8,15 @@ export const ContextMenu = styled.div`
     z-index: 1000; /* 다른 요소 위로 표시 */
     padding: 8px;
     border-radius: 4px;
+    pointer-events: auto; /* 클릭 이벤트 허용 */
 `;
 
 export const ContextMenuItem = styled.div`
     padding: 8px 12px;
     cursor: pointer;
+    pointer-events: auto; /* 클릭 이벤트 허용 */
+    z-index: 1000; /* 다른 요소 위로 출력 */
+
 
     &:hover {
         background-color: #f0f0f0;

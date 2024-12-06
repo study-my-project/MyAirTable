@@ -7,3 +7,8 @@ export const excel_table_td = styled.td`
     min-width: 50px;
     max-width: 100px;
 `
+export const excel_table_input = styled.input`
+    border: none;
+    width: 100%;
+    text-align: center;
+`

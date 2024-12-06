@@ -1,12 +1,10 @@
-
 import * as styles from "./sheet_field.style";
 import { useContextMenu } from "../contextmenu";
 
-
-type field = { id: string; fieldName: string; fieldIndex: number };
-
+type field = { id: string; fieldName: string; fieldIndex: number; tableId: string };
 export default function SheetField({ field }: { field: field }) {
-    const { handleContextMenu, renderContextMenu } = useContextMenu();
+
+    const { handleContextMenu, renderContextMenu } = useContextMenu(field.tableId);
 
     return (
         <>
