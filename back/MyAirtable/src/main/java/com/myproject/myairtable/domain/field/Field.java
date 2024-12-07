@@ -2,6 +2,7 @@ package com.myproject.myairtable.domain.field;
 
 import com.myproject.myairtable.domain.field.dto.FieldCreateRequestDto;
 import com.myproject.myairtable.domain.field.dto.FieldUpdateRequestDto;
+import com.myproject.myairtable.domain.field.dto.FieldWidthUpdateRequestDto;
 import com.myproject.myairtable.global.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -41,12 +42,17 @@ public class Field extends BaseEntity {
     @Column(name = "field_index", nullable = false)
     private int fieldIndex;
 
+    // 필드 크기
+    @Column(name = "field_width", nullable = false)
+    private int fieldWidth;
+
     public Field (FieldCreateRequestDto fieldCreateRequestDto, int fieldIndex) {
         this.tableId = fieldCreateRequestDto.getTableId();
         this.fieldName = fieldCreateRequestDto.getFieldName();
         this.type = fieldCreateRequestDto.getType();
         this.options = fieldCreateRequestDto.getOptions();
         this.fieldIndex = fieldIndex;
+        this.fieldWidth = 100;
     }
 
     public void updateField (FieldUpdateRequestDto fieldUpdateRequestDto) {
@@ -59,6 +65,10 @@ public class Field extends BaseEntity {
         if(fieldUpdateRequestDto.getOptions() != null){
             this.options = fieldUpdateRequestDto.getOptions();
         }
+    }
+
+    public void updateFieldWidth(FieldWidthUpdateRequestDto fieldWidthUpdateRequestDto) {
+        this.fieldWidth = fieldWidthUpdateRequestDto.getNewWidth();
     }
 
 

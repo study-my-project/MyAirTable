@@ -1,18 +1,23 @@
 import styled from '@emotion/styled'
 
-
-export const excel_table_th = styled.th`
-    border: 1px solid #ccc;
-    padding: 5px;
-    text-align: center; /* 중앙 정렬 */
-    font-size: 14px; /* 글자 크기 고정 */
-    line-height: 1.5; /* 줄 높이 */
-    min-width: 50px;
-    overflow: hidden; /* 넘치는 텍스트 숨기기 */
-    white-space: nowrap; /* 텍스트 줄바꿈 방지 */
-
-    font-family: inherit; /* 부모 요소의 폰트 설정을 따르도록 */
+export const sheet_field_th = styled.th`
+  border: 1px solid #ccc;
+  text-align: center;
   font-size: 14px;
-  font-weight: normal; /* 기본 폰트 두께 */
-  letter-spacing: normal; /* 글자 간격 기본값 */
+  position: relative; /* ResizeHandle 기준 위치 설정 */
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+  overflow: hidden; /* 텍스트 잘림 허용 */
+  text-overflow: ellipsis; /* 긴 텍스트 생략 (...) */
+  padding: 2px; /* 여백 최소화 */
+  min-width: 5px; /* 최소 너비 설정 */
+`;
+
+export const ResizeHandle = styled.div`
+    width: 8px; /* 크기 조절 핸들의 두께 */
+    height: 100%; /* 필드 전체 높이 */
+    position: absolute;
+    right: 0; /* 필드 오른쪽 끝에 고정 */
+    top: 0;
+    cursor: col-resize; /* 마우스 커서 스타일 변경 */
+    z-index: 10; /* 우선순위 높임 */
 `;

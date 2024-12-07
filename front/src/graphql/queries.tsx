@@ -172,6 +172,24 @@ mutation UpdateFieldIndex ($fieldId:ID!,$newIndex:Int! ) {
 }
 `
 
+// 필드 너비 변경
+export const UPDATE_FIELD_WIDTH = gql`
+    mutation UpdateFieldWidth ($fieldId:ID!,$newWidth:Int! ){
+    updateFieldWidth(fieldWidthUpdateRequestDto: { fieldId: $fieldId, newWidth: $newWidth }) {
+        id
+        tableId
+        fieldName
+        fieldIndex
+        type
+        options
+        fieldWidth
+        createdAt
+        updatedAt
+    }
+}
+
+`
+
 // 필드 삭제
 export const DELETE_FIELD = gql`
     mutation DeleteField ($fieldId:ID!){
@@ -221,6 +239,7 @@ query GetTableDetailsById($tableId:ID!) {
             fieldName
             type
             options
+            fieldWidth
             fieldIndex
             createdAt
             updatedAt

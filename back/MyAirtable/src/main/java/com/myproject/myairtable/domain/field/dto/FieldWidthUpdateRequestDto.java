@@ -5,12 +5,11 @@ import lombok.Getter;
 
 @Getter
 @Data
-public class FieldIndexUpdateRequestDto {
+public class FieldWidthUpdateRequestDto {
 
-    // 변경할 필드의 id값
+    // 필드 ID
     private Long fieldId;
 
-    // 이동할 Index 값
-    private int newIndex;
-
+    // 수정할 width 값
+    private int newWidth;
 }

@@ -376,7 +376,7 @@ export default function WorkspacePage() {
                                 <styles.BaseItem
                                     key={base.id}
                                     // 해당 화면을 클릭하면 workspaces/base.id 로 이동시킴
-                                    onClick={() => router.push(`/workspaces/${base.id}`)}
+                                    onClick={() => router.push(`/workspaces2/${base.id}`)}
                                 >
                                     <styles.BaseTitle>{base.baseName}</styles.BaseTitle>
 

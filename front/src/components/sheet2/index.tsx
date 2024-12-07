@@ -6,24 +6,11 @@ import type {
     Mutation,
 } from "../../../src/commons/types/generated/types";
 import {
-    CREATE_CELL_VALUE,
     GET_TABLE_DETAILS,
-    UPDATE_CELL_VALUE,
     CREATE_FIELD,
     CREATE_RECORD,
-    UPDATE_RECORD_INDEX,
-    UPDATE_FIELD_INDEX
 } from "../../../src/graphql/queries";
 import { useMutation, useQuery } from "@apollo/client";
-import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
-import {
-    arrayMove,
-    SortableContext,
-    verticalListSortingStrategy,
-    useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-
 import SheetField from "../sheet_field";
 import SheetRecord from "../sheet_record";
 
@@ -62,7 +49,7 @@ export default function Sheet({ tableId }: { tableId: string }) {
     }, [tableId])    // 발동조건 tableId 값이 변경될때만 실행함.
 
     // 받아온 테이블 ID값을 사용해서 Field, Record, CellValue 가져오기
-    const { data: tableDetailsData, refetch } = useQuery<
+    const { data: tableDetailsData } = useQuery<
         Pick<Query, "getTableDetailsById">,
         QueryGetTableDetailsByIdArgs
     >(GET_TABLE_DETAILS, {
@@ -73,7 +60,7 @@ export default function Sheet({ tableId }: { tableId: string }) {
     // 필드, 레코드, CellValue를 각각 저장하기위해 useState 만들어주기 
     // 받아오는 데이터는 리스트 형태임
     const [fields, setFields] = useState<
-        { id: string; fieldName: string; fieldIndex: number; tableId:string; }[]
+        { id: string; fieldName: string; fieldIndex: number; tableId:string; fieldWidth: number; }[]
     >([]);
     const [records, setRecords] = useState<
         { id: string; recordIndex: number; tableId:string; }[]
@@ -173,7 +160,9 @@ export default function Sheet({ tableId }: { tableId: string }) {
                             <tr>
                                 {/* th : 테이블의 헤더 셀을 정의하는 태그 */}
                                 {/* 텍스트가 굵고 가운데 정렬되어있음 */}
-                                <styles.excel_table_th>{/* 테이블의 좌상단 빈칸 */}</styles.excel_table_th>
+
+                                {/* 테이블의 좌상단 빈칸 */}
+                                <styles.excel_table_th style={{width:`30px`}}/>
                                 {fields.map((field) => (
                                     <SheetField
                                         key={field.id}
@@ -181,7 +170,7 @@ export default function Sheet({ tableId }: { tableId: string }) {
                                     />
                                 ))}
                                 {/* 헤더 */}
-                                <styles.excel_table_th>
+                                <styles.excel_table_th style={{width:`100px`}}>
                                     <styles.create_button onClick={handleCreateField}> + 필드 </styles.create_button>
                                 </styles.excel_table_th>
                             </tr>
@@ -202,13 +191,13 @@ export default function Sheet({ tableId }: { tableId: string }) {
                             ))}
                             {/* 레코드 추가 버튼 */}
                             <tr>
-                                <styles.excel_table_td>
+                                <styles.excel_table_td  colSpan={fields.length + 1}>
                                     <styles.create_button onClick={handleCreateRecord}> + 레코드 </styles.create_button>
                                 </styles.excel_table_td>
                             </tr>
                         </tbody>
                     </styles.excel_table>
-                </styles.excel_container>
+                    </styles.excel_container>
             </styles.excel_table_wrapper>
 
 

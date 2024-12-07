@@ -3,6 +3,7 @@ package com.myproject.myairtable.domain.field;
 import com.myproject.myairtable.domain.field.dto.FieldCreateRequestDto;
 import com.myproject.myairtable.domain.field.dto.FieldIndexUpdateRequestDto;
 import com.myproject.myairtable.domain.field.dto.FieldUpdateRequestDto;
+import com.myproject.myairtable.domain.field.dto.FieldWidthUpdateRequestDto;
 import com.myproject.myairtable.domain.record.Record;
 import com.myproject.myairtable.domain.record.dto.RecordIndexUpdateRequestDto;
 import jakarta.transaction.Transactional;
@@ -47,7 +48,6 @@ public class FieldService {
     // 필드 순서 변경
     @Transactional
     public Boolean updateFieldIndex(FieldIndexUpdateRequestDto fieldIndexUpdateRequestDto) {
-        System.out.println(fieldIndexUpdateRequestDto.getFieldId());
         try {
             // 변경할 레코드 조회
             Field field = fieldRepository.findById(fieldIndexUpdateRequestDto.getFieldId())
@@ -98,6 +98,16 @@ public class FieldService {
             return false;
         }
 
+    }
+
+    // 필드 width 조절
+    public Field updateFieldWidth(FieldWidthUpdateRequestDto fieldWidthUpdateRequestDto){
+        return fieldRepository.findById(fieldWidthUpdateRequestDto.getFieldId())
+                .map(field -> {
+                    field.updateFieldWidth(fieldWidthUpdateRequestDto);  // update 메서드 호출
+                    return fieldRepository.save(field); // 변경된 필드 저장 후 반환
+                })
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 필드를 찾을 수 없습니다: " + fieldWidthUpdateRequestDto.getFieldId()));
     }
 
     // Delete (논리 삭제)

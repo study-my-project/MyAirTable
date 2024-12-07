@@ -66,6 +66,7 @@ export type Field = {
   createdAt?: Maybe<Scalars['String']['output']>;
   fieldIndex: Scalars['Int']['output'];
   fieldName: Scalars['String']['output'];
+  fieldWidth: Scalars['Int']['output'];
   id: Scalars['ID']['output'];
   options: Scalars['String']['output'];
   tableId: Scalars['ID']['output'];
@@ -83,6 +84,11 @@ export type FieldCreateRequestDto = {
 export type FieldIndexUpdateRequestDto = {
   fieldId: Scalars['ID']['input'];
   newIndex: Scalars['Int']['input'];
+};
+
+export type FieldWidthUpdateRequestDto = {
+  fieldId: Scalars['ID']['input'];
+  newWidth: Scalars['Int']['input'];
 };
 
 export type Mutation = {
@@ -115,6 +121,8 @@ export type Mutation = {
   updateCellValue: CellValue;
   /**  필드 순서 변경 */
   updateFieldIndex: Scalars['Boolean']['output'];
+  /**  필드 너비 수정 */
+  updateFieldWidth: Field;
   /**  레코드 순서 변경 */
   updateRecordIndex: Scalars['Boolean']['output'];
   /**  테이블 업데이트 */
@@ -193,6 +201,11 @@ export type MutationUpdateCellValueArgs = {
 
 export type MutationUpdateFieldIndexArgs = {
   fieldIndexUpdateRequestDto: FieldIndexUpdateRequestDto;
+};
+
+
+export type MutationUpdateFieldWidthArgs = {
+  fieldWidthUpdateRequestDto: FieldWidthUpdateRequestDto;
 };
 
 
@@ -300,6 +313,7 @@ export type Table = {
   baseId: Scalars['ID']['output'];
   createdAt?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  tableIndex: Scalars['Int']['output'];
   tableName: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['String']['output']>;
 };

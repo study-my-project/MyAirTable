@@ -3,6 +3,7 @@ package com.myproject.myairtable.domain.field;
 import com.myproject.myairtable.domain.field.dto.FieldCreateRequestDto;
 import com.myproject.myairtable.domain.field.dto.FieldIndexUpdateRequestDto;
 import com.myproject.myairtable.domain.field.dto.FieldUpdateRequestDto;
+import com.myproject.myairtable.domain.field.dto.FieldWidthUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -41,6 +42,12 @@ public class FieldController {
     @MutationMapping
     public Boolean updateFieldIndex (@Argument FieldIndexUpdateRequestDto fieldIndexUpdateRequestDto) {
         return fieldService.updateFieldIndex(fieldIndexUpdateRequestDto);
+    }
+
+    // 필드 크기 조절
+    @MutationMapping
+    public Field updateFieldWidth(@Argument FieldWidthUpdateRequestDto fieldWidthUpdateRequestDto) {
+        return fieldService.updateFieldWidth(fieldWidthUpdateRequestDto);
     }
 
     // Delete (논리 삭제)
