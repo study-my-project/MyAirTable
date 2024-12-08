@@ -104,7 +104,7 @@ public class FieldService {
     public Field updateFieldWidth(FieldWidthUpdateRequestDto fieldWidthUpdateRequestDto){
         return fieldRepository.findById(fieldWidthUpdateRequestDto.getFieldId())
                 .map(field -> {
-                    field.updateFieldWidth(fieldWidthUpdateRequestDto);  // update 메서드 호출
+                    field.updateFieldWidth(fieldWidthUpdateRequestDto.getNewWidth());  // update 메서드 호출
                     return fieldRepository.save(field); // 변경된 필드 저장 후 반환
                 })
                 .orElseThrow(() -> new IllegalArgumentException("해당 ID의 필드를 찾을 수 없습니다: " + fieldWidthUpdateRequestDto.getFieldId()));

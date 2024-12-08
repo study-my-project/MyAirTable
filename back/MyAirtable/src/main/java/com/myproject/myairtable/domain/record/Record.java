@@ -26,13 +26,23 @@ public class Record extends BaseEntity {
     @Column(name = "record_index", nullable = false)
     private int recordIndex;
 
+    // 레코드 크기
+
+    @Column(name = "record_height", nullable = false)
+    private int recordHeight;
+
     public Record (RecordCreateRequestDto RecordCreateRequestDto, int recordIndex) {
         this.tableId = RecordCreateRequestDto.getTableId();
         this.recordIndex = recordIndex;
+        this.recordHeight = 25;
     }
 
     public void updateRecordIndex(int newIndex) {
         this.recordIndex = newIndex;
     }
 
+
+    public void updateRecordHeight(int newHeight) {
+        this.recordHeight = newHeight;
+    }
 }

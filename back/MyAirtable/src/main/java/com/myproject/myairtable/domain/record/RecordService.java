@@ -1,6 +1,9 @@
 package com.myproject.myairtable.domain.record;
 
+import com.myproject.myairtable.domain.field.Field;
+import com.myproject.myairtable.domain.field.dto.FieldWidthUpdateRequestDto;
 import com.myproject.myairtable.domain.record.dto.RecordCreateRequestDto;
+import com.myproject.myairtable.domain.record.dto.RecordHeightUpdateRequestDto;
 import com.myproject.myairtable.domain.record.dto.RecordIndexUpdateRequestDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -83,6 +86,17 @@ public class RecordService {
             return false;
         }
 
+    }
+
+
+    // 레코드 Height 조절
+    public Record updateRecordHeight(RecordHeightUpdateRequestDto recordHeightUpdateRequestDto){
+        return recordRepository.findById(recordHeightUpdateRequestDto.getRecordId())
+                .map(record -> {
+                    record.updateRecordHeight(recordHeightUpdateRequestDto.getNewHeight());  // update 메서드 호출
+                    return recordRepository.save(record); // 변경된 레코드 저장 후 반환
+                })
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 레코드를 찾을 수 없습니다: " + recordHeightUpdateRequestDto.getRecordId()));
     }
 
 

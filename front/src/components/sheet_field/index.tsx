@@ -20,6 +20,7 @@ export default function SheetField({ field }: { field: field }) {
     const [updateFieldWidth] = useMutation(UPDATE_FIELD_WIDTH);
 
     const handleResizeMouseDown = (e: React.MouseEvent) => {
+        // 기본동작을 막음
         e.preventDefault();
         const startX = e.clientX; // 마우스 시작 위치
         const startWidth = width; // 초기 필드 너비

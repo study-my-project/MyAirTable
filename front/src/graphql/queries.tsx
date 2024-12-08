@@ -208,6 +208,23 @@ export const CREATE_RECORD = gql`
     }
 }
 `
+
+// 레코드 높이 조절하기
+export const UPDATE_RECORD_HEIGHT = gql`
+    mutation UpdateRecordHeight ($recordId: ID!, $newHeight:Int!) {
+    updateRecordHeight(
+        recordHeightUpdateRequestDto: { recordId: $recordId, newHeight: $newHeight }
+    ) {
+        id
+        tableId
+        recordIndex
+        recordHeight
+        createdAt
+        updatedAt
+    }
+}
+
+`
 // 레코드 자리 바꾸기
 export const UPDATE_RECORD_INDEX = gql`
     mutation UpdateRecordIndex($recordId:ID!,$newIndex:Int! ) {
@@ -248,6 +265,7 @@ query GetTableDetailsById($tableId:ID!) {
             id
             tableId
             recordIndex
+            recordHeight
             createdAt
             updatedAt
         }

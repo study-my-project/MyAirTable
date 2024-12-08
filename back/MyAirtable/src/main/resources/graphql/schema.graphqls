@@ -53,19 +53,25 @@ type Mutation {
     updateFieldIndex(fieldIndexUpdateRequestDto: FieldIndexUpdateRequestDto!) : Boolean!
     # 필드 너비 수정
     updateFieldWidth(fieldWidthUpdateRequestDto: FieldWidthUpdateRequestDto!) : Field!
-
     # 필드 삭제
     deleteField(fieldId:ID!) : Boolean!
+
     # 레코드 생성
     createRecord(recordCreateRequestDto: RecordCreateRequestDto!) : Record!
     # 레코드 순서 변경
     updateRecordIndex(recordIndexUpdateRequestDto: RecordIndexUpdateRequestDto!) : Boolean!
+    # 레코드 높이 수정
+    updateRecordHeight(recordHeightUpdateRequestDto: RecordHeightUpdateRequestDto!) : Record!
     # 레코드 삭제
     deleteRecord(recordId : ID!) : Boolean!
     # CellValue 생성
     createCellValue(cellValueCreateRequestDto: CellValueCreateRequestDto!) : CellValue!
     # CellValue 수정
     updateCellValue(cellValueUpdateRequestDto: CellValueUpdateRequestDto!) : CellValue!
+}
+input RecordHeightUpdateRequestDto {
+    recordId : ID!
+    newHeight: Int!
 }
 input FieldWidthUpdateRequestDto{
     fieldId: ID!
@@ -183,6 +189,7 @@ type Record{
     id : ID!
     tableId: ID!
     recordIndex : Int!
+    recordHeight : Int!
     createdAt: String
     updatedAt: String
 }

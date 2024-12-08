@@ -63,7 +63,7 @@ export default function Sheet({ tableId }: { tableId: string }) {
         { id: string; fieldName: string; fieldIndex: number; tableId:string; fieldWidth: number; }[]
     >([]);
     const [records, setRecords] = useState<
-        { id: string; recordIndex: number; tableId:string; }[]
+        { id: string; recordIndex: number; tableId:string; recordHeight: number; }[]
     >([]);
     const [cellValues, setCellValues] = useState<
         { fieldId: string; recordId: string; value: string }[]

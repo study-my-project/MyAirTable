@@ -67,8 +67,8 @@ public class Field extends BaseEntity {
         }
     }
 
-    public void updateFieldWidth(FieldWidthUpdateRequestDto fieldWidthUpdateRequestDto) {
-        this.fieldWidth = fieldWidthUpdateRequestDto.getNewWidth();
+    public void updateFieldWidth(int newWidth) {
+        this.fieldWidth = newWidth;
     }
 
 

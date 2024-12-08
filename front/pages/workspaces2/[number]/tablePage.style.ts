@@ -2,22 +2,22 @@ import styled from "@emotion/styled";
 
 // 컨테이너 스타일
 export const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;                                // 자식 요소들을 플렉스 박스로 배치
+  flex-direction: column;                       // 자식 요소를 세로 방향으로 배치
+  padding: 20px;                                // 내부 여백 20px
+  background-color: #f9f9f9;                    // 배경색 
+  border-radius: 8px;                           // 모서리 둥글게
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);   // 약간의 그림자로 입체감
 `;
 
 // 탭 컨테이너
 export const Tabs = styled.div`
-  display: flex;
-  overflow-x: hidden; /* 스크롤 막대를 숨김 */
-  flex: 1;
-  position: relative;
-  margin: 0 5px; /* 좌우 버튼 공간 확보 */
-  scroll-behavior: smooth; /* 부드러운 스크롤 */
+  display: flex;                                // 자식 요소들을 플렉스 박스로 배치
+  overflow-x: hidden;                           // 스크롤 막대를 숨김(가로)
+  flex: 1;                                      // 부모 요소에서 가능한 모든 공간차지
+  position: relative;                           // 자식 요소 위치를 기준으로 설정
+  margin: 0 5px;                                // 좌우 여백 5px
+  scroll-behavior: smooth;                      // 스크롤 이동 부드럽게
 `;
 
 // 개별 탭

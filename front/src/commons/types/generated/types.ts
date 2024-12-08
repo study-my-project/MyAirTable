@@ -123,6 +123,8 @@ export type Mutation = {
   updateFieldIndex: Scalars['Boolean']['output'];
   /**  필드 너비 수정 */
   updateFieldWidth: Field;
+  /**  레코드 높이 수정 */
+  updateRecordHeight: Record;
   /**  레코드 순서 변경 */
   updateRecordIndex: Scalars['Boolean']['output'];
   /**  테이블 업데이트 */
@@ -206,6 +208,11 @@ export type MutationUpdateFieldIndexArgs = {
 
 export type MutationUpdateFieldWidthArgs = {
   fieldWidthUpdateRequestDto: FieldWidthUpdateRequestDto;
+};
+
+
+export type MutationUpdateRecordHeightArgs = {
+  recordHeightUpdateRequestDto: RecordHeightUpdateRequestDto;
 };
 
 
@@ -294,6 +301,7 @@ export type Record = {
   __typename?: 'Record';
   createdAt?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  recordHeight: Scalars['Int']['output'];
   recordIndex: Scalars['Int']['output'];
   tableId: Scalars['ID']['output'];
   updatedAt?: Maybe<Scalars['String']['output']>;
@@ -301,6 +309,11 @@ export type Record = {
 
 export type RecordCreateRequestDto = {
   tableId: Scalars['ID']['input'];
+};
+
+export type RecordHeightUpdateRequestDto = {
+  newHeight: Scalars['Int']['input'];
+  recordId: Scalars['ID']['input'];
 };
 
 export type RecordIndexUpdateRequestDto = {

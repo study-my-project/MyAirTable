@@ -1,6 +1,7 @@
 package com.myproject.myairtable.domain.record;
 
 import com.myproject.myairtable.domain.record.dto.RecordCreateRequestDto;
+import com.myproject.myairtable.domain.record.dto.RecordHeightUpdateRequestDto;
 import com.myproject.myairtable.domain.record.dto.RecordIndexUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -32,6 +33,11 @@ public class RecordController {
     @MutationMapping
     public Boolean updateRecordIndex(@Argument RecordIndexUpdateRequestDto recordIndexUpdateRequestDto){
         return recordService.updateRecordIndex(recordIndexUpdateRequestDto);
+    }
+    // 레코드 높이 조절
+    @MutationMapping
+    public Record updateRecordHeight(@Argument RecordHeightUpdateRequestDto recordHeightUpdateRequestDto) {
+        return recordService.updateRecordHeight(recordHeightUpdateRequestDto);
     }
 
     // Delete (논리 삭제)

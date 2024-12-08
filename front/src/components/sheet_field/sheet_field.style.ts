@@ -7,13 +7,12 @@ export const sheet_field_th = styled.th`
   position: relative; /* ResizeHandle 기준 위치 설정 */
   white-space: nowrap; /* 텍스트 줄바꿈 방지 */
   overflow: hidden; /* 텍스트 잘림 허용 */
-  text-overflow: ellipsis; /* 긴 텍스트 생략 (...) */
+  text-overflow: clip; /* 긴 텍스트 생략 (...) */
   padding: 2px; /* 여백 최소화 */
-  min-width: 5px; /* 최소 너비 설정 */
 `;
 
 export const ResizeHandle = styled.div`
-    width: 8px; /* 크기 조절 핸들의 두께 */
+    width: 4px; /* 크기 조절 핸들의 두께 */
     height: 100%; /* 필드 전체 높이 */
     position: absolute;
     right: 0; /* 필드 오른쪽 끝에 고정 */
