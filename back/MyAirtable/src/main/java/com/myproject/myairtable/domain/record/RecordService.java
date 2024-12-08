@@ -101,11 +101,21 @@ public class RecordService {
 
 
     // Delete (논리 삭제)
+    @Transactional
     public Boolean deleteRecord(Long id) {
         return recordRepository.findById(id)
                 .map(record -> {
+                    // 삭제하는 레코드의 인덱스값
+                    int deletedIndex = record.getRecordIndex();
+                    Long tableId = record.getTableId();
                     record.delete(); // 논리적 삭제 수행
                     recordRepository.save(record); // 변경사항 저장
+                    // 삭제된 인덱스보다 큰 인덱스들을 -1 함
+                    List<Record> affectedRecords = recordRepository.findByTableIdAndIndexGreaterThan(tableId,deletedIndex);
+                    for (Record r : affectedRecords) {
+                        r.updateRecordIndex(r.getRecordIndex() - 1);
+                    }
+                    recordRepository.saveAll(affectedRecords); // 조정된 레코드들 저장
                     return true;
                 })
                 .orElse(false);

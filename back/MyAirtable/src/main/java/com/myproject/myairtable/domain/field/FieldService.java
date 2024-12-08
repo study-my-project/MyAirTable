@@ -114,8 +114,17 @@ public class FieldService {
     public Boolean deleteField(Long id) {
         return fieldRepository.findById(id)
                 .map(field -> {
+                    // 삭제하려는 필드의 Index값
+                    int deletedIndex = field.getFieldIndex();
+                    Long tableId = field.getTableId();
                     field.delete(); // 논리적 삭제 수행
                     fieldRepository.save(field); // 변경사항 저장
+
+                    // 삭제된 인덱스보다 큰 인덱스 -1 시킴
+                    List<Field> affectedFields = fieldRepository.findByTableIdAndIndexGreaterThan(tableId,deletedIndex);
+                    for (Field f : affectedFields) {
+                        f.updateFieldIndex(f.getFieldIndex() - 1);
+                    }
                     return true;
                 })
                 .orElse(false);

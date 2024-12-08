@@ -18,4 +18,8 @@ public interface FieldRepository extends JpaRepository<Field, Long> {
     //특정 테이블의 논리적으로 삭제되지 않은 필드를 인덱스로 조회
     @Query("SELECT f FROM Field f WHERE f.tableId = :tableId AND f.fieldIndex = :fieldIndex AND f.deletedAt IS NULL")
     Field findByTableIdAndFieldIndex(@Param("tableId") Long tableId, @Param("fieldIndex") int fieldIndex);
+
+    // 특정 테이블의 논리적으로 삭제되지 않은 필드중 특정 인덱스보다 큰 필드 조회
+    @Query("SELECT f FROM Field f WHERE f.tableId = :tableId AND f.fieldIndex > :fieldIndex AND f.deletedAt IS NULL ORDER BY f.fieldIndex ASC")
+    List<Field> findByTableIdAndIndexGreaterThan(@Param("tableId") Long tableId, @Param("fieldIndex") int fieldIndex);
 }

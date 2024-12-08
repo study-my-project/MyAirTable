@@ -42,6 +42,7 @@ public class Record extends BaseEntity {
     }
 
 
+
     public void updateRecordHeight(int newHeight) {
         this.recordHeight = newHeight;
     }
