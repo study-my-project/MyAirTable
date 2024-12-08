@@ -37,12 +37,12 @@ public class FieldService {
 
     // Update
     public Field updateField (FieldUpdateRequestDto fieldUpdateRequestDto) {
-        return fieldRepository.findById(fieldUpdateRequestDto.getId())
+        return fieldRepository.findById(fieldUpdateRequestDto.getFieldId())
                 .map(field -> {
                     field.updateField(fieldUpdateRequestDto);  // update 메서드 호출
                     return fieldRepository.save(field); // 변경된 필드 저장 후 반환
                 })
-                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 필드를 찾을 수 없습니다: " + fieldUpdateRequestDto.getId()));
+                .orElseThrow(() -> new IllegalArgumentException("해당 ID의 필드를 찾을 수 없습니다: " + fieldUpdateRequestDto.getFieldId()));
     }
 
     // 필드 순서 변경

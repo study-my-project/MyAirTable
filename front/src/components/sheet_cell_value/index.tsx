@@ -98,12 +98,22 @@ export default function SheetCellValue({ cellValues, recordId, fieldId }: { cell
         }
     };
 
-    // 엔터 버튼을 사용해서 포커스 종료하기
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        // 입력된 키가 Enter 키라면
-        if (event.key === "Enter") {
-            // 엔터 키가 눌렸을 때 포커스 해제
-            (event.target as HTMLInputElement).blur();
+    // 엔터 버튼을 사용해서 포커스 종료하기 , Alt + 엔터면 줄바꿈
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        // Alt 엔터
+        if (event.altKey && event.key === "Enter") {
+            const target = event.target as HTMLTextAreaElement;
+            const value = target.value;
+            const start = target.selectionStart;
+            const end = target.selectionEnd;
+
+            // 현재 커서 위치에 줄바꿈 추가
+            target.value = value.substring(0, start) + "\n" + value.substring(end);
+            target.selectionStart = target.selectionEnd = start + 1; // 커서 위치 조정
+            event.preventDefault(); // 기본 동작 방지
+        } else if (event.key === "Enter") {
+            // 일반 Enter는 blur()로 포커스 해제
+            (event.target as HTMLTextAreaElement).blur();
         }
     };
 
@@ -116,22 +126,13 @@ export default function SheetCellValue({ cellValues, recordId, fieldId }: { cell
     return (
         <styles.excel_table_td key={`${recordId}-${fieldId}`}>
             <styles.excel_table_input
-                type="text"
                 value={currentValue}
                 onFocus={() => handleCellFocus(recordId, fieldId)}
-                onChange={(e) =>
-                    handleCellChange(recordId, fieldId, e.target.value)
-                }
-                onBlur={(e) =>
-                    handleCellBlur(recordId, fieldId, e.target.value)
-                }
+                onChange={(e) => handleCellChange(recordId, fieldId, e.target.value)}
+                onBlur={(e) => handleCellBlur(recordId, fieldId, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(e)}
-            >
-
-
-            </styles.excel_table_input>
-
-        </styles.excel_table_td>
+            />
+        </styles.excel_table_td >
     )
 
 

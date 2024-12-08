@@ -14,7 +14,7 @@ export const sheet_record_td = styled.td`
   min-height: 1px;
 `
 
-export const ResizeHandle = styled.div`
+export const resize_handle = styled.div`
     width: 100%; 
     height: 3px; 
     position: absolute;

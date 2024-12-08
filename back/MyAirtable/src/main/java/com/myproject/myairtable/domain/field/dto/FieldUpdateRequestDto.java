@@ -7,7 +7,7 @@ import lombok.Getter;
 @Data
 public class FieldUpdateRequestDto {
     // 필드 ID
-    private Long Id;
+    private Long fieldId;
 
     // 상단부 이름
     private String fieldName;

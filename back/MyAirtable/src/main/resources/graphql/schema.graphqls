@@ -49,6 +49,8 @@ type Mutation {
 
     # 필드 생성
     createField(fieldCreateRequestDto: FieldCreateRequestDto!) : Field!
+    # 필드 이름 수정하기
+    updateField(fieldUpdateRequestDto: FieldUpdateRequestDto!) : Field!
     # 필드 순서 변경
     updateFieldIndex(fieldIndexUpdateRequestDto: FieldIndexUpdateRequestDto!) : Boolean!
     # 필드 너비 수정
@@ -68,6 +70,12 @@ type Mutation {
     createCellValue(cellValueCreateRequestDto: CellValueCreateRequestDto!) : CellValue!
     # CellValue 수정
     updateCellValue(cellValueUpdateRequestDto: CellValueUpdateRequestDto!) : CellValue!
+}
+input FieldUpdateRequestDto{
+    fieldId : ID!
+    fieldName : String
+    type: String
+    options : String
 }
 input RecordHeightUpdateRequestDto {
     recordId : ID!

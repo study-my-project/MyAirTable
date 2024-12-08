@@ -165,6 +165,26 @@ export const CREATE_FIELD = gql`
 }
 `
 
+// 필드 이름 수정하기
+export const UPDATE_FIELD_NAME = gql`
+    mutation UpdateField ($fieldId:ID!, $fieldName:String, $type:String $options:String){
+    updateField(
+        fieldUpdateRequestDto: { fieldId: $fieldId, fieldName: $fieldName, type: $type, options: $options }
+    ) {
+        id
+        tableId
+        fieldName
+        fieldIndex
+        type
+        options
+        fieldWidth
+        createdAt
+        updatedAt
+    }
+}
+
+`
+
 // 필드 자리 바꾸기
 export const UPDATE_FIELD_INDEX = gql`
 mutation UpdateFieldIndex ($fieldId:ID!,$newIndex:Int! ) {

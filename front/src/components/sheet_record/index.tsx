@@ -31,10 +31,8 @@ export default function SheetRecord({ record, cellValues, fields }: { record: re
         e.preventDefault();
         // 초기 마우스 Y값
         const startY = e.clientY;
-        console.log("startY: ", startY)
         // 초기 레코드 높이값
         const startHeight = height;
-        console.log("startHeight", startHeight)
 
         // 최신값을 저장할 변수 newHeight
         let newHeight = startHeight;
@@ -44,10 +42,6 @@ export default function SheetRecord({ record, cellValues, fields }: { record: re
             const deltaY = moveEvent.clientY - startY;
             // 최소값을 5로, 초기값 + 이동값 = 새로운 높이
             newHeight = Math.max(5, startHeight + deltaY);
-
-            console.log("deltaY", deltaY)
-
-            console.log("newHeight", newHeight)
             // 새로운 높이값 저장
             setHeight(newHeight);
         };
@@ -90,7 +84,7 @@ export default function SheetRecord({ record, cellValues, fields }: { record: re
                     onContextMenu={(e) => handleContextMenu(e, "record", record.id)}
                     style={{ height: `${height}px` }} >
                     {record.recordIndex}
-                    <styles.ResizeHandle onMouseDown={handleResizeMouseDown} />
+                    <styles.resize_handle onMouseDown={handleResizeMouseDown} />
                 </styles.sheet_record_td>
 
                 {fields.map((field) => {

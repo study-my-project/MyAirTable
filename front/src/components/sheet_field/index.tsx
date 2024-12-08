@@ -3,6 +3,7 @@ import { useContextMenu } from "../contextmenu";
 import { useState } from "react";
 import {
     UPDATE_FIELD_WIDTH,
+    UPDATE_FIELD_NAME,
 } from "../../../src/graphql/queries";
 import { useMutation } from "@apollo/client";
 
@@ -59,14 +60,56 @@ export default function SheetField({ field }: { field: field }) {
         document.addEventListener("mouseup", handleMouseUp);
     };
 
+
+    // 필드 이름 수정하기    
+    const [fieldName, setFieldName] = useState(field.fieldName); // 로컬 필드 이름 상태
+    const [updateFieldName] = useMutation(UPDATE_FIELD_NAME);
+
+    // 이름 수정하기
+    const handleFieldNameEdit = async () => {
+        try {
+            await updateFieldName({
+                variables: {
+                    fieldId: field.id,
+                    fieldName: fieldName.trim(),
+                },
+            });
+        } catch (error) {
+            console.error("Failed to update field name:", error);
+        }
+    };
+
+    // 엔터키 눌렀을때 포커스 종료
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") {
+            // 이름 수정하기 기능 동작시킴
+            handleFieldNameEdit();
+        }
+    };
+
+    // 포커스 되면 수정중으로 변경
+    const handleBlur = () => {
+        handleFieldNameEdit();
+    };
+
+
     return (
         <>
             <styles.sheet_field_th
                 onContextMenu={(e) => handleContextMenu(e, "field", field.id)}
                 // 동적 너비 적용
                 style={{ width: `${width}px` }} >
-                {field.fieldName}
-                <styles.ResizeHandle onMouseDown={handleResizeMouseDown} />
+                {/* 필드 이름을 클릭하면 input으로 전환 */}
+
+                <styles.field_name
+                    value={fieldName}
+                    onChange={(e) => setFieldName(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    onBlur={handleBlur}
+                    autoFocus
+                />
+
+                <styles.resize_handle onMouseDown={handleResizeMouseDown} />
                 {/* 컨텍스트 메뉴 렌더링 */}
                 {renderContextMenu()}
             </styles.sheet_field_th>

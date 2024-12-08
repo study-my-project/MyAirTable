@@ -1,12 +1,10 @@
 package com.myproject.myairtable.domain.cellvalue;
 
 import com.myproject.myairtable.domain.cellvalue.dto.CellValueCreateRequestDto;
-import com.myproject.myairtable.domain.cellvalue.dto.CellValueReadRequestDto;
 import com.myproject.myairtable.domain.cellvalue.dto.CellValueUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,8 +14,15 @@ public class CellValueService {
 
     // Create
     public CellValue createCellValue(CellValueCreateRequestDto cellValueCreateRequestDto) {
-        CellValue cellValue = new CellValue(cellValueCreateRequestDto);
-        return cellValueRepository.save(cellValue);
+        // 기존에 있는지 검색
+        return cellValueRepository.findByFieldIdAndRecordIdAndDeletedAtIsNull(
+                cellValueCreateRequestDto.getFieldId(),
+                cellValueCreateRequestDto.getRecordId()
+        ).orElseGet(() -> {
+            // 존재하지 않는 경우 새로 생성
+            CellValue newCellValue = new CellValue(cellValueCreateRequestDto);
+            return cellValueRepository.save(newCellValue);
+        });
     }
 
 
@@ -31,10 +36,11 @@ public class CellValueService {
                     cellValue.updateCellValue(cellValueUpdateRequestDto);  // update 메서드 호출
                     return cellValueRepository.save(cellValue); // 변경된 필드 저장 후 반환
                 })
-                .orElseThrow(() ->
-                        new IllegalArgumentException("해당 Field ID와 Record ID의 Value를 찾을 수 없습니다: " +
-                                "FieldId=" + cellValueUpdateRequestDto.getFieldId() + ", RecordId=" + cellValueUpdateRequestDto.getRecordId())
-                );
+                .orElseGet(() -> {
+                    // 데이터가 없으면 새로 생성
+                    CellValue newCellValue = new CellValue(cellValueUpdateRequestDto);
+                    return cellValueRepository.save(newCellValue);
+                });
     }
 
     // Delete (논리 삭제)

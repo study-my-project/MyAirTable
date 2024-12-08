@@ -11,7 +11,7 @@ export const sheet_field_th = styled.th`
   padding: 2px; /* 여백 최소화 */
 `;
 
-export const ResizeHandle = styled.div`
+export const resize_handle = styled.div`
     width: 4px; /* 크기 조절 핸들의 두께 */
     height: 100%; /* 필드 전체 높이 */
     position: absolute;
@@ -20,3 +20,18 @@ export const ResizeHandle = styled.div`
     cursor: col-resize; /* 마우스 커서 스타일 변경 */
     z-index: 10; /* 우선순위 높임 */
 `;
+
+export const field_name = styled.input`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box; /* 패딩 포함한 크기 계산 */
+  border: none; /* 기본 테두리 제거 */
+  padding: 0; /* 여백 제거 */
+  text-align: center; /* 텍스트 가운데 정렬 */
+  font-size: 14px; /* 텍스트 크기 */
+  background: transparent; /* 배경 투명 */
+  outline: none; /* 포커스 시 테두리 제거 */
+`

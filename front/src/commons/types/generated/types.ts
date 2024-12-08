@@ -86,6 +86,13 @@ export type FieldIndexUpdateRequestDto = {
   newIndex: Scalars['Int']['input'];
 };
 
+export type FieldUpdateRequestDto = {
+  fieldId: Scalars['ID']['input'];
+  fieldName?: InputMaybe<Scalars['String']['input']>;
+  options?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type FieldWidthUpdateRequestDto = {
   fieldId: Scalars['ID']['input'];
   newWidth: Scalars['Int']['input'];
@@ -119,6 +126,8 @@ export type Mutation = {
   updateBase: Base;
   /**  CellValue 수정 */
   updateCellValue: CellValue;
+  /**  필드 이름 수정하기 */
+  updateField: Field;
   /**  필드 순서 변경 */
   updateFieldIndex: Scalars['Boolean']['output'];
   /**  필드 너비 수정 */
@@ -198,6 +207,11 @@ export type MutationUpdateBaseArgs = {
 
 export type MutationUpdateCellValueArgs = {
   cellValueUpdateRequestDto: CellValueUpdateRequestDto;
+};
+
+
+export type MutationUpdateFieldArgs = {
+  fieldUpdateRequestDto: FieldUpdateRequestDto;
 };
 
 

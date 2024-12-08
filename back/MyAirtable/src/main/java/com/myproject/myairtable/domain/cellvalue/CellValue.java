@@ -37,6 +37,11 @@ public class CellValue extends BaseEntity {
         this.recordId = cellValueCreateRequestDto.getRecordId();
         this.value = cellValueCreateRequestDto.getValue();
     }
+    public CellValue (CellValueUpdateRequestDto cellValueUpdateRequestDto) {
+        this.fieldId = cellValueUpdateRequestDto.getFieldId();
+        this.recordId = cellValueUpdateRequestDto.getRecordId();
+        this.value = cellValueUpdateRequestDto.getValue();
+    }
 
     public void updateCellValue (CellValueUpdateRequestDto cellValueUpdateRequestDto) {
         if(cellValueUpdateRequestDto.getValue() != null){
