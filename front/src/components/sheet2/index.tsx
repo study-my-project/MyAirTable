@@ -10,6 +10,7 @@ import {
     CREATE_FIELD,
     CREATE_RECORD,
     UPDATE_FIELD_INDEX,
+    UPDATE_RECORD_INDEX,
 } from "../../../src/graphql/queries";
 import { useMutation, useQuery } from "@apollo/client";
 import SheetField from "../sheet_field";
@@ -37,7 +38,7 @@ export default function Sheet({ tableId }: { tableId: string }) {
     });
 
     const [updateFieldIndex] = useMutation(UPDATE_FIELD_INDEX); // 필드 인덱스 업데이트 뮤테이션
-
+    const [updateRecordIndex] = useMutation(UPDATE_RECORD_INDEX);
 
     // ----------------------------------
 
@@ -157,22 +158,17 @@ export default function Sheet({ tableId }: { tableId: string }) {
 
 
     // 필드 드래그 앤 드롭 핸들러
-    const handleDragEnd = async (event: DragEndEvent) => {
+    const handleDragEndField = async (event: DragEndEvent) => {
 
         const { active, over } = event;
-
         if (active.id !== over?.id) {
             const newIndex = fields.findIndex((field) => field.id === over?.id);
-
-
             // 서버에 새 인덱스 업데이트
-
             try {
                 await updateFieldIndex({
                     variables: {
                         fieldId: active.id,
                         newIndex: newIndex + 1,
-
                     },
                     refetchQueries: [
                         {
@@ -187,25 +183,49 @@ export default function Sheet({ tableId }: { tableId: string }) {
         }
     }
 
+
+    // 레코드 드래그 앤 드롭
+    const handleDragEndRecord = async (event: DragEndEvent) => {
+        const { active, over } = event;
+        console.log(active)
+        if (active.id !== over?.id) {
+            const newIndex = records.findIndex((record) => record.id === over?.id);
+            // 서버에 새로운 인덱스 업데이트
+            try {
+                await updateRecordIndex({
+                    variables: {
+                        recordId: active.id,
+                        // 기본 인덱스는 0부터인데 백엔드에서는 1부터 만들도록 설정해서 +1 해줌
+                        newIndex: newIndex + 1,
+                    },
+                    refetchQueries: [
+                        {
+                            query: GET_TABLE_DETAILS, // 기존의 쿼리
+                            variables: { tableId },  // 테이블 ID를 포함해야 함
+                        },
+                    ],
+                });
+            } catch (error) {
+                console.error("Failed to update record indexes:", error);
+            }
+        }
+    }
     return (
         <>
             <styles.excel_table_wrapper>
                 <styles.excel_container>
-                    <DndContext
-                        collisionDetection={closestCenter}
-                        onDragEnd={handleDragEnd}>
-                        <SortableContext
-                            items={fields.map((field) => field.id)}
-                            strategy={horizontalListSortingStrategy}
-                        >
+                    <styles.excel_table>
+                        <DndContext
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEndField}>
+                            <SortableContext
+                                items={fields.map((field) => field.id)}
+                                strategy={horizontalListSortingStrategy}
+                            >
+                                {/* table : 테이블의 전체 구조를 정의 하는 태그 */}
+                                {/* 테이블 데이터를 포함하는 컨테이너 역할 */}
 
-
-                            {/* table : 테이블의 전체 구조를 정의 하는 태그 */}
-                            {/* 테이블 데이터를 포함하는 컨테이너 역할 */}
-                            <styles.excel_table>
                                 {/* 필드 관련 내용  */}
-                                {/* <DndContext> */}
-                                {/* <SortableContext> */}
                                 {/* thead : 테이블의 헤더 영역 */}
                                 {/* 보통 테이블의 열의 제목을 포함함 */}
                                 <thead>
@@ -230,11 +250,18 @@ export default function Sheet({ tableId }: { tableId: string }) {
                                         </styles.excel_table_th>
                                     </tr>
                                 </thead>
-                                {/* </SortableContext> */}
-                                {/* </DndContext> */}
+                            </SortableContext>
+                        </DndContext>
 
+                        {/* 레코드 */}
 
-                                {/* 레코드 */}
+                        <DndContext
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEndRecord}>
+                            <SortableContext
+                                items={fields.map((field) => field.id)}
+                                strategy={horizontalListSortingStrategy}
+                            >
                                 <tbody>
                                     {records.map((record) => (
                                         <SheetRecord
@@ -242,6 +269,7 @@ export default function Sheet({ tableId }: { tableId: string }) {
                                             record={record}
                                             cellValues={cellValues}
                                             fields={fields || []}
+                                            isDragDisabled={false} // 드래그 비활성화 플래그
                                         />
                                     ))}
                                     {/* 레코드 추가 버튼 */}
@@ -251,20 +279,11 @@ export default function Sheet({ tableId }: { tableId: string }) {
                                         </styles.excel_table_td>
                                     </tr>
                                 </tbody>
-                            </styles.excel_table>
-
-
-                        </SortableContext>
-                    </DndContext>
-
-
-
+                            </SortableContext>
+                        </DndContext>
+                    </styles.excel_table>
                 </styles.excel_container>
             </styles.excel_table_wrapper>
-
-
-
         </>
-
     )
 }

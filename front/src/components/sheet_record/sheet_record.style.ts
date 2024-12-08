@@ -23,3 +23,19 @@ export const resize_handle = styled.div`
     cursor: row-resize; /* 마우스 커서 변경 */
     z-index: 10; /* 우선순위 높임 */
 `;
+
+export const sheet_drag_handle = styled.div`
+  width: 80%; /* 드래그 가능한 영역의 너비 */
+  height: 80%; /* 드래그 가능한 영역의 높이 */
+  margin: auto; /* 중앙 정렬 */
+  cursor: grab; /* 드래그 커서 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+
+
+  &:active {
+    cursor: grabbing; /* 드래그 중 커서 변경 */
+  }
+`;

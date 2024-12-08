@@ -7,12 +7,14 @@ import {
     UPDATE_RECORD_HEIGHT,
 } from "../../../src/graphql/queries";
 import { useMutation } from "@apollo/client";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type record = { id: string; recordIndex: number; tableId: string; recordHeight: number; };
 type cellValues = { fieldId: string; recordId: string; value: string; }[];
 type fields = { id: string; fieldName: string; tableId: string; fieldWidth: number; }[];
 
-export default function SheetRecord({ record, cellValues, fields }: { record: record, cellValues: cellValues, fields: fields }) {
+export default function SheetRecord({ record, cellValues, fields, isDragDisabled }: { record: record, cellValues: cellValues, fields: fields, isDragDisabled: boolean }) {
 
 
     // useContextMenu를 최상위에서 호출
@@ -76,14 +78,31 @@ export default function SheetRecord({ record, cellValues, fields }: { record: re
         document.addEventListener("mouseup", handleMouseUp);
     }
 
+    // 드래그 드롭 할때 선택되지 않도록 하기
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+        id: record.id,
+        disabled: isDragDisabled, // 드래그 비활성화 조건
+    });
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+
+
 
     return (
         <>
             <tr>
                 <styles.sheet_record_td
+                    ref={setNodeRef} // 드래그 가능한 요소로 설정
                     onContextMenu={(e) => handleContextMenu(e, "record", record.id)}
-                    style={{ height: `${height}px` }} >
-                    {record.recordIndex}
+                    style={{ ...style, height: `${height}px` }} >
+                    <styles.sheet_drag_handle
+                        {...attributes}
+                        {...(isDragDisabled ? {} : listeners)} // 드래그 이벤트를 조건부로 추가
+                    >
+                        {record.recordIndex}
+                    </styles.sheet_drag_handle>
                     <styles.resize_handle onMouseDown={handleResizeMouseDown} />
                 </styles.sheet_record_td>
 

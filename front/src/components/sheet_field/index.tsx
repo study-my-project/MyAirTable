@@ -108,20 +108,21 @@ export default function SheetField({ field, isDragDisabled }: { field: field, is
             <styles.sheet_field_th
                 ref={setNodeRef} // 드래그 가능한 요소로 설정
                 onContextMenu={(e) => handleContextMenu(e, "field", field.id)}
-                {...attributes}
-                {...(isDragDisabled ? {} : listeners)} // 드래그 이벤트를 조건부로 추가
                 // 동적 너비 적용
                 style={{ ...style, width: `${width}px` }}>
                 {/* 필드 이름을 클릭하면 input으로 전환 */}
-
-                <styles.field_name
-                    value={fieldName}
-                    onChange={(e) => setFieldName(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onBlur={handleBlur}
-                    autoFocus
-                />
-
+                <styles.sheet_drag_handle
+                {...attributes}
+                {...(isDragDisabled ? {} : listeners)} // 드래그 이벤트를 조건부로 추가
+                >
+                    <styles.field_name
+                        value={fieldName}
+                        onChange={(e) => setFieldName(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        onBlur={handleBlur}
+                        autoFocus
+                    />
+                </styles.sheet_drag_handle>
                 <styles.resize_handle onMouseDown={handleResizeMouseDown} />
                 {/* 컨텍스트 메뉴 렌더링 */}
                 {renderContextMenu()}

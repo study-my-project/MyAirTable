@@ -35,3 +35,18 @@ export const field_name = styled.input`
   background: transparent; /* 배경 투명 */
   outline: none; /* 포커스 시 테두리 제거 */
 `
+export const sheet_drag_handle = styled.div`
+  width: 80%; /* 드래그 가능한 영역의 너비 */
+  height: 80%; /* 드래그 가능한 영역의 높이 */
+  margin: auto; /* 중앙 정렬 */
+  cursor: grab; /* 드래그 커서 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+
+
+  &:active {
+    cursor: grabbing; /* 드래그 중 커서 변경 */
+  }
+`;
