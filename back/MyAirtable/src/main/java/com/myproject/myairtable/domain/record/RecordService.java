@@ -34,6 +34,12 @@ public class RecordService {
     }
 
     // 순서변경
+    // for 문, 조건문을 사용해서 명확한 처리
+    // 변경 범위를 정확히 제어, 불필요한 연산을 피함
+    // 동시성 제어를 하지 않아 데드락 발생위험
+    // 반복문을 직접 사용하여 유지보수성이 떨어짐
+    //
+    // 데이터 규모가 작아서 필드인덱스 수정보다 이쪽이 유리함
     @Transactional
     public Boolean updateRecordIndex(RecordIndexUpdateRequestDto recordIndexUpdateRequestDto) {
         try {

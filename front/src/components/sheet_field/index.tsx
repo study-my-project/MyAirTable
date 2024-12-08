@@ -6,11 +6,21 @@ import {
     UPDATE_FIELD_NAME,
 } from "../../../src/graphql/queries";
 import { useMutation } from "@apollo/client";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 
 type field = { id: string; fieldName: string; fieldIndex: number; tableId: string; fieldWidth: number; };
-export default function SheetField({ field }: { field: field }) {
+export default function SheetField({ field, isDragDisabled }: { field: field, isDragDisabled: boolean }) {
 
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+        id: field.id,
+        disabled: isDragDisabled, // 드래그 비활성화 조건
+    });
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
     const { handleContextMenu, renderContextMenu } = useContextMenu(field.tableId);
 
 
@@ -96,9 +106,12 @@ export default function SheetField({ field }: { field: field }) {
     return (
         <>
             <styles.sheet_field_th
+                ref={setNodeRef} // 드래그 가능한 요소로 설정
                 onContextMenu={(e) => handleContextMenu(e, "field", field.id)}
+                {...attributes}
+                {...(isDragDisabled ? {} : listeners)} // 드래그 이벤트를 조건부로 추가
                 // 동적 너비 적용
-                style={{ width: `${width}px` }} >
+                style={{ ...style, width: `${width}px` }}>
                 {/* 필드 이름을 클릭하면 input으로 전환 */}
 
                 <styles.field_name

@@ -9,10 +9,21 @@ import {
     GET_TABLE_DETAILS,
     CREATE_FIELD,
     CREATE_RECORD,
+    UPDATE_FIELD_INDEX,
 } from "../../../src/graphql/queries";
 import { useMutation, useQuery } from "@apollo/client";
 import SheetField from "../sheet_field";
 import SheetRecord from "../sheet_record";
+import {
+    DndContext,
+    closestCenter,
+    DragEndEvent,
+} from "@dnd-kit/core";
+import {
+    SortableContext,
+    horizontalListSortingStrategy,
+} from "@dnd-kit/sortable";
+
 
 export default function Sheet({ tableId }: { tableId: string }) {
 
@@ -24,6 +35,10 @@ export default function Sheet({ tableId }: { tableId: string }) {
     const [createRecord] = useMutation<Pick<Mutation, "createRecord">>(CREATE_RECORD, {
         refetchQueries: [{ query: GET_TABLE_DETAILS, variables: { tableId } }],
     });
+
+    const [updateFieldIndex] = useMutation(UPDATE_FIELD_INDEX); // 필드 인덱스 업데이트 뮤테이션
+
+
     // ----------------------------------
 
 
@@ -60,10 +75,10 @@ export default function Sheet({ tableId }: { tableId: string }) {
     // 필드, 레코드, CellValue를 각각 저장하기위해 useState 만들어주기 
     // 받아오는 데이터는 리스트 형태임
     const [fields, setFields] = useState<
-        { id: string; fieldName: string; fieldIndex: number; tableId:string; fieldWidth: number; }[]
+        { id: string; fieldName: string; fieldIndex: number; tableId: string; fieldWidth: number; }[]
     >([]);
     const [records, setRecords] = useState<
-        { id: string; recordIndex: number; tableId:string; recordHeight: number; }[]
+        { id: string; recordIndex: number; tableId: string; recordHeight: number; }[]
     >([]);
     const [cellValues, setCellValues] = useState<
         { fieldId: string; recordId: string; value: string }[]
@@ -141,63 +156,110 @@ export default function Sheet({ tableId }: { tableId: string }) {
     }, [tableDetailsData])
 
 
+    // 필드 드래그 앤 드롭 핸들러
+    const handleDragEnd = async (event: DragEndEvent) => {
+
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            const newIndex = fields.findIndex((field) => field.id === over?.id);
+
+
+            // 서버에 새 인덱스 업데이트
+
+            try {
+                await updateFieldIndex({
+                    variables: {
+                        fieldId: active.id,
+                        newIndex: newIndex + 1,
+
+                    },
+                    refetchQueries: [
+                        {
+                            query: GET_TABLE_DETAILS, // 기존의 쿼리
+                            variables: { tableId },  // 테이블 ID를 포함해야 함
+                        },
+                    ],
+                });
+            } catch (error) {
+                console.error("Failed to update field indexes:", error);
+            }
+        }
+    }
 
     return (
         <>
             <styles.excel_table_wrapper>
                 <styles.excel_container>
-                    {/* table : 테이블의 전체 구조를 정의 하는 태그 */}
-                    {/* 테이블 데이터를 포함하는 컨테이너 역할 */}
-                    <styles.excel_table>
-                        {/* 필드 관련 내용  */}
-                        {/* <DndContext> */}
-                        {/* <SortableContext> */}
-                        {/* thead : 테이블의 헤더 영역 */}
-                        {/* 보통 테이블의 열의 제목을 포함함 */}
-                        <thead>
-                            {/* tr : 테이블의 행을 정의하는 태그 */}
-                            {/* <thead>, <tbody>, <tfoot> 안에서 사용 */}
-                            <tr>
-                                {/* th : 테이블의 헤더 셀을 정의하는 태그 */}
-                                {/* 텍스트가 굵고 가운데 정렬되어있음 */}
-
-                                {/* 테이블의 좌상단 빈칸 */}
-                                <styles.excel_table_th style={{width:`30px`}}/>
-                                {fields.map((field) => (
-                                    <SheetField
-                                        key={field.id}
-                                        field={field}
-                                    />
-                                ))}
-                                {/* 헤더 */}
-                                <styles.excel_table_th style={{width:`100px`}}>
-                                    <styles.create_button onClick={handleCreateField}> + 필드 </styles.create_button>
-                                </styles.excel_table_th>
-                            </tr>
-                        </thead>
-                        {/* </SortableContext> */}
-                        {/* </DndContext> */}
+                    <DndContext
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}>
+                        <SortableContext
+                            items={fields.map((field) => field.id)}
+                            strategy={horizontalListSortingStrategy}
+                        >
 
 
-                        {/* 레코드 */}
-                        <tbody>
-                            {records.map((record) => (
-                                <SheetRecord
-                                    key={record.id}
-                                    record={record}
-                                    cellValues={cellValues}
-                                    fields={fields || []}
-                                />
-                            ))}
-                            {/* 레코드 추가 버튼 */}
-                            <tr>
-                                <styles.excel_table_td  colSpan={fields.length + 1}>
-                                    <styles.create_button onClick={handleCreateRecord}> + 레코드 </styles.create_button>
-                                </styles.excel_table_td>
-                            </tr>
-                        </tbody>
-                    </styles.excel_table>
-                    </styles.excel_container>
+                            {/* table : 테이블의 전체 구조를 정의 하는 태그 */}
+                            {/* 테이블 데이터를 포함하는 컨테이너 역할 */}
+                            <styles.excel_table>
+                                {/* 필드 관련 내용  */}
+                                {/* <DndContext> */}
+                                {/* <SortableContext> */}
+                                {/* thead : 테이블의 헤더 영역 */}
+                                {/* 보통 테이블의 열의 제목을 포함함 */}
+                                <thead>
+                                    {/* tr : 테이블의 행을 정의하는 태그 */}
+                                    {/* <thead>, <tbody>, <tfoot> 안에서 사용 */}
+                                    <tr>
+                                        {/* th : 테이블의 헤더 셀을 정의하는 태그 */}
+                                        {/* 텍스트가 굵고 가운데 정렬되어있음 */}
+
+                                        {/* 테이블의 좌상단 빈칸 */}
+                                        <styles.excel_table_th style={{ width: `30px` }} />
+                                        {fields.map((field) => (
+                                            <SheetField
+                                                key={field.id}
+                                                field={field}
+                                                isDragDisabled={false} // 드래그 비활성화 플래그
+                                            />
+                                        ))}
+                                        {/* 헤더 */}
+                                        <styles.excel_table_th style={{ width: `100px` }}>
+                                            <styles.create_button onClick={handleCreateField}> + 필드 </styles.create_button>
+                                        </styles.excel_table_th>
+                                    </tr>
+                                </thead>
+                                {/* </SortableContext> */}
+                                {/* </DndContext> */}
+
+
+                                {/* 레코드 */}
+                                <tbody>
+                                    {records.map((record) => (
+                                        <SheetRecord
+                                            key={record.id}
+                                            record={record}
+                                            cellValues={cellValues}
+                                            fields={fields || []}
+                                        />
+                                    ))}
+                                    {/* 레코드 추가 버튼 */}
+                                    <tr>
+                                        <styles.excel_table_td colSpan={fields.length + 1}>
+                                            <styles.create_button onClick={handleCreateRecord}> + 레코드 </styles.create_button>
+                                        </styles.excel_table_td>
+                                    </tr>
+                                </tbody>
+                            </styles.excel_table>
+
+
+                        </SortableContext>
+                    </DndContext>
+
+
+
+                </styles.excel_container>
             </styles.excel_table_wrapper>
 
 

@@ -36,7 +36,7 @@ public class FieldService {
     }
 
     // Update
-    public Field updateField (FieldUpdateRequestDto fieldUpdateRequestDto) {
+    public Field updateField(FieldUpdateRequestDto fieldUpdateRequestDto) {
         return fieldRepository.findById(fieldUpdateRequestDto.getFieldId())
                 .map(field -> {
                     field.updateField(fieldUpdateRequestDto);  // update 메서드 호출
@@ -46,62 +46,54 @@ public class FieldService {
     }
 
     // 필드 순서 변경
+    // 동시성 문제를 예방했음
+    // 필드 이동 로직이 깔끔하고 유지보수가 쉬움
+    // synchronized 키워드는 글로벌 잠금이기에 성능병목이 있을 수 있음
+    // 모든 필드를 한번에 가져와 처리하므로 데이터 양이 많을수록 비효율적
+    // synchronized 블록에서 DB 작업이 이루어지면 잠금시간이 길어질 수 있음.
     @Transactional
     public Boolean updateFieldIndex(FieldIndexUpdateRequestDto fieldIndexUpdateRequestDto) {
-        try {
-            // 변경할 레코드 조회
-            Field field = fieldRepository.findById(fieldIndexUpdateRequestDto.getFieldId())
-                    .orElseThrow(() -> new IllegalArgumentException("Field not found with id: " + fieldIndexUpdateRequestDto.getFieldId()));
 
-            // 이동할 Index값
-            int newIndex = fieldIndexUpdateRequestDto.getNewIndex();
-            // 동일한 테이블 내에서만 변경하기위해 테이블id 가져오기
-            Long tableId = field.getTableId();
+        int newIndex = fieldIndexUpdateRequestDto.getNewIndex();
 
-            // 기존 index 값
-            int oldIndex = field.getFieldIndex();
+        // 변경할 레코드 조회
+        Field field = fieldRepository.findById(fieldIndexUpdateRequestDto.getFieldId())
+                .orElseThrow(() -> new IllegalArgumentException("Field not found with id: " + fieldIndexUpdateRequestDto.getFieldId()));
 
-            // 만약 기존 = 신규 면 변경할 필요없이 종료
-            if (oldIndex == newIndex) {
-                return true; // 이미 올바른 위치에 있으므로 성공으로 간주
-            }
+        Long tableId = field.getTableId();
+        int oldIndex = field.getFieldIndex();
 
-            // 인덱스 순서로 테이블내의 field 를 전부 불러옴
-            List<Field> fields = fieldRepository.findByTableIdOrderByFieldIndex(tableId);
 
-            // 새로운 index가 기존 index 보다 작으면
-            if (newIndex < oldIndex) {
-                // 앞으로 이동해야함
-                for (Field f : fields) {
-                    // 가져온 레코드의 index가 새로운 인덱스보다 크고, 기존 index보다 작으면
-                    if (f.getFieldIndex() >= newIndex && f.getFieldIndex() < oldIndex) {
-                        // 인덱스 값을 1씩 증가 (변경할 레코드가 들어갈 자리를 만들기 위해서)
-                        f.updateFieldIndex(f.getFieldIndex() + 1);
-                    }
-                }
-                // 아니면 ( 새로운 index가 기존 index 보다 크면 )
-            } else {
-                // 뒤로 이동해야함
-                for (Field f : fields) {
-                    if (f.getFieldIndex() > oldIndex && f.getFieldIndex() <= newIndex) {
-                        f.updateFieldIndex(f.getFieldIndex() - 1);
-                    }
-                }
-            }
-
-            // 변경하려는 레코드의 index를 업데이트
-            field.updateFieldIndex(newIndex);
-            return true; // 성공적으로 업데이트 완료
-        } catch (Exception e) {
-            // 예외 발생 시 false 반환
-            e.printStackTrace();
-            return false;
+        if (oldIndex == newIndex) {
+            return true; // 이미 올바른 위치
         }
+
+        // 트랜잭션 잠금 설정
+        // 데드락(동시성 제어)를 위해
+        List<Field> fields = fieldRepository.findByTableIdOrderByFieldIndex(tableId);
+        synchronized (this) {
+            if (newIndex < oldIndex) {
+                // 앞으로 이동
+                fields.stream()
+                        .filter(f -> f.getFieldIndex() >= newIndex && f.getFieldIndex() < oldIndex)
+                        .forEach(f -> f.updateFieldIndex(f.getFieldIndex() + 1));
+            } else {
+                // 뒤로 이동
+                fields.stream()
+                        .filter(f -> f.getFieldIndex() > oldIndex && f.getFieldIndex() <= newIndex)
+                        .forEach(f -> f.updateFieldIndex(f.getFieldIndex() - 1));
+            }
+
+            // 변경하려는 레코드의 인덱스 설정
+            field.updateFieldIndex(newIndex);
+        }
+
+        return true;
 
     }
 
     // 필드 width 조절
-    public Field updateFieldWidth(FieldWidthUpdateRequestDto fieldWidthUpdateRequestDto){
+    public Field updateFieldWidth(FieldWidthUpdateRequestDto fieldWidthUpdateRequestDto) {
         return fieldRepository.findById(fieldWidthUpdateRequestDto.getFieldId())
                 .map(field -> {
                     field.updateFieldWidth(fieldWidthUpdateRequestDto.getNewWidth());  // update 메서드 호출
@@ -121,7 +113,7 @@ public class FieldService {
                     fieldRepository.save(field); // 변경사항 저장
 
                     // 삭제된 인덱스보다 큰 인덱스 -1 시킴
-                    List<Field> affectedFields = fieldRepository.findByTableIdAndIndexGreaterThan(tableId,deletedIndex);
+                    List<Field> affectedFields = fieldRepository.findByTableIdAndIndexGreaterThan(tableId, deletedIndex);
                     for (Field f : affectedFields) {
                         f.updateFieldIndex(f.getFieldIndex() - 1);
                     }
