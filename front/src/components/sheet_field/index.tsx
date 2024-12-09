@@ -29,6 +29,7 @@ export default function SheetField({ field, isDragDisabled }: { field: field, is
     // 초기 너비 
     const [width, setWidth] = useState(field.fieldWidth);
     const [updateFieldWidth] = useMutation(UPDATE_FIELD_WIDTH);
+    const [isEditing, setIsEditing] = useState(false); // 필드 이름 수정 중인지 확인
 
     const handleResizeMouseDown = (e: React.MouseEvent) => {
         // 기본동작을 막음
@@ -94,12 +95,14 @@ export default function SheetField({ field, isDragDisabled }: { field: field, is
         if (e.key === "Enter") {
             // 이름 수정하기 기능 동작시킴
             handleFieldNameEdit();
+            setIsEditing(false); // 이름 수정 종료
         }
     };
 
     // 포커스 되면 수정중으로 변경
     const handleBlur = () => {
         handleFieldNameEdit();
+        setIsEditing(false); // 이름 수정 종료
     };
 
 
@@ -113,11 +116,12 @@ export default function SheetField({ field, isDragDisabled }: { field: field, is
                 {/* 필드 이름을 클릭하면 input으로 전환 */}
                 <styles.sheet_drag_handle
                 {...attributes}
-                {...(isDragDisabled ? {} : listeners)} // 드래그 이벤트를 조건부로 추가
+                  {...(isDragDisabled || isEditing ? {} : listeners)} // 수정 중이면 드래그 비활성화
                 >
                     <styles.field_name
                         value={fieldName}
                         onChange={(e) => setFieldName(e.target.value)}
+                        onFocus={() => setIsEditing(true)} // 이름 수정 시작
                         onKeyDown={handleKeyDown}
                         onBlur={handleBlur}
                         autoFocus

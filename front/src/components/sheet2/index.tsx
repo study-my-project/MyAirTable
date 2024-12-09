@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as styles from "./sheet.style";
 import type {
     QueryGetTableDetailsByIdArgs,
@@ -210,9 +210,22 @@ export default function Sheet({ tableId }: { tableId: string }) {
             }
         }
     }
+
+
+    // 기본화면 스크롤 최 좌측
+    // 테이블 컨테이너에 대한 ref 생성
+    const tableContainerRef = useRef<HTMLDivElement>(null);
+    // **스크롤 초기화**
+    useEffect(() => {
+        // 테이블 컨테이너가 존재할 경우 스크롤 위치를 왼쪽 끝으로 설정
+        if (tableContainerRef.current) {
+            tableContainerRef.current.scrollLeft = 0; // 가로 스크롤을 초기화
+        }
+    }, [fields, records]); // 필드 또는 레코드가 변경될 때 실행
+
     return (
         <>
-            <styles.excel_table_wrapper>
+            <styles.excel_table_wrapper ref={tableContainerRef}>
                 <styles.excel_container>
                     <styles.excel_table>
                         <DndContext

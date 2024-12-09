@@ -10,9 +10,9 @@ import * as styles from "./tablePage.style";
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Sheet from "../../../src/components/sheet2"
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, horizontalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { useSortable } from "@dnd-kit/sortable";
+import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortable";
+import Tab from "../../../src/components/tab"
+
 // 모달 타입 정의
 type ModalType = "create_table" | "edit_table" | "delete_table";
 
@@ -27,7 +27,7 @@ export default function TablePage() {
     const baseId = Array.isArray(number) ? number[0] : number;
 
     //baseId 가지고 table들 리스트로 가져오기
-    const { data, refetch } = useQuery<Pick<Query, "getTablesByBaseId">, QueryGetTablesByBaseIdArgs>(GET_BASE_TABLES, {
+    const { data } = useQuery<Pick<Query, "getTablesByBaseId">, QueryGetTablesByBaseIdArgs>(GET_BASE_TABLES, {
         variables: baseId ? { baseId } : undefined,
         skip: !baseId,
     });
@@ -244,10 +244,10 @@ export default function TablePage() {
     const [contextMenu, setContextMenu] = useState<{ x: number; y: number; tableId: string } | null>(
         null
     );
+    // 컨텍스트 메뉴 닫기 핸들러
     const handleCloseContextMenu = () => {
         setContextMenu(null);
     };
-
     const handleContextMenu = (e: React.MouseEvent, tableId: string) => {
         e.preventDefault();
         setContextMenu({
@@ -257,16 +257,33 @@ export default function TablePage() {
         });
     };
 
+    // 컨텍스트 메뉴 외부 클릭 시 닫기
+    useEffect(() => {
+        const handleClickOutside = () => {
+            // 컨텍스트 메뉴가 열려 있을 때만 닫기 동작 수행
+            if (contextMenu) {
+                handleCloseContextMenu();
+            }
+        };
+    
+        // 전역 클릭 이벤트 리스너 추가
+        document.addEventListener("click", handleClickOutside);
+    
+        // 컴포넌트 언마운트 시 이벤트 리스너 제거
+        return () => {
+            document.removeEventListener("click", handleClickOutside);
+        };
+    }, [contextMenu]);
+
     // 현재 선택된 테이블 ID 상태
     const [activeTab, setActiveTab] = useState<string | null>(null);
 
-    // 탭 클릭 이벤트 핸들러
-    const handleTabClick = (tabId: string) => {
-        setActiveTab(tabId);
-        // 서버로부터 가져온 필드를 초기화
-        // const fetchedFields = tableDetailsData?.getTableDetailsById.fields || [];
-        // setFields([...fetchedFields]);
-        console.log(tabId)
+    // // 탭 클릭 이벤트 핸들러
+    const handleTabClick = (tableId: string) => {
+        console.log(activeTab)
+        if (activeTab !== tableId) {
+            setActiveTab(tableId); // 상태 업데이트
+        }
     };
 
     // 탭 좌우 스크롤
@@ -285,26 +302,21 @@ export default function TablePage() {
     };
 
 
+    // 테이블 드래그 드랍으로 순서 이동 핸들러
     const handleTableDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
-
-        if (!over || !over.id || active.id === over.id) return;
-
-        const oldIndex = orderedTables.findIndex((table) => table.id === active.id);
-        const newIndex = orderedTables.findIndex((table) => table.id === over.id);
-
-        const reorderedTables = arrayMove(orderedTables, oldIndex, newIndex).map((table, index) => ({
-            ...table,
-            index,
-        }));
-        setOrderedTables(reorderedTables);
-
-        try {
-            await updateTableIndex({ variables: { tableId: active.id, newIndex } });
-            refetch();
-        } catch (error) {
-            console.error("테이블 순서 업데이트 중 오류:", error);
-            refetch();
+        if (active.id !== over?.id) {
+            const newIndex = orderedTables.findIndex((table) => table.id === over?.id);
+            try {
+                await updateTableIndex({
+                    variables: {
+                        tableId: active.id,
+                        newIndex: newIndex + 1,
+                    },
+                });
+            } catch (e) {
+                console.error("Failed to update table indexes:", e)
+            }
         }
     };
 
@@ -327,12 +339,12 @@ export default function TablePage() {
                     >
                         <styles.Tabs ref={scrollContainerRef}>
                             {orderedTables.map((table) => (
-                                <SortableTab
+                                <Tab
                                     key={table.id}
                                     table={table}
                                     isActive={table.id === activeTab}
-                                    onClick={() => handleTabClick(table.id)}
-                                    onContextMenu={(e) => handleContextMenu(e, table.id)}
+                                    onClick={(tableId) => handleTabClick(tableId)} // 활성화된 탭 설정
+                                    onContextMenu={(e, tabId) => handleContextMenu(e, tabId)} // 컨텍스트 메뉴
                                 />
                             ))}
                         </styles.Tabs>
@@ -436,45 +448,4 @@ export default function TablePage() {
         </styles.Container >
 
     )
-}
-function SortableTab({
-    table,
-    isActive,
-    onClick,
-    onContextMenu,
-}: {
-    table: { id: string; tableName: string; index: number };
-    isActive: boolean;
-    onClick: () => void;
-    onContextMenu: (e: React.MouseEvent, tableId: string) => void;
-}) {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
-        id: table.id,
-    });
-
-    const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-    };
-
-    // 드래그 중인지 감지하기 위한 로컬 상태
-    const [isDragging, setIsDragging] = useState(false);
-
-    return (
-        <styles.Tab
-            ref={setNodeRef}
-            style={style}
-            {...attributes}
-            {...listeners}
-            isActive={isActive}
-            onPointerDown={() => setIsDragging(false)} // 클릭 시작 시 드래그 상태 초기화
-            onPointerMove={() => setIsDragging(true)} // 포인터 이동 시 드래그 상태로 설정
-            onPointerUp={() => {
-                if (!isDragging) onClick(); // 드래그 상태가 아니면 클릭 처리
-            }}
-            onContextMenu={(e) => onContextMenu(e, table.id)}
-        >
-            {table.tableName}
-        </styles.Tab>
-    );
 }

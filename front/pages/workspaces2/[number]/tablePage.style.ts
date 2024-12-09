@@ -8,6 +8,7 @@ export const Container = styled.div`
   background-color: #f9f9f9;                    // 배경색 
   border-radius: 8px;                           // 모서리 둥글게
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);   // 약간의 그림자로 입체감
+
 `;
 
 // 탭 컨테이너

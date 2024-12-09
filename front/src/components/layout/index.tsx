@@ -1,5 +1,5 @@
 import LayoutHeader from "./Header";
-import LayoutFooter from "./Footer";
+// import LayoutFooter from "./Footer";
 import * as styles from "./layout.style";
 
 
@@ -13,7 +13,7 @@ export default function Layout(props: ILayoutProps): JSX.Element {
         <styles.layout>
             <LayoutHeader />
             <styles.content>{props.children}</styles.content>
-            <LayoutFooter />
+            {/* <LayoutFooter /> */}
         </styles.layout>
     )
 }

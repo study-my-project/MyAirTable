@@ -2,8 +2,9 @@ import styled from '@emotion/styled'
 
 export const excel_table_wrapper = styled.div`
   overflow-x: auto; /* 가로 스크롤 활성화 */
+  overflow-y: auto; /* 세로 스크롤 활성화 */
   max-width: 100%;  // 컨테이너 너비는 부모 요소에 맞춤
-  max-height: 100%; /* 상위 요소의 높이 제한 제거 */
+  max-height: 74vh; /* 상위 요소의 높이 제한 제거 */
   border: 1px solid #ccc;
   padding: 0;
   margin: 0;
